@@ -5,47 +5,147 @@ import ReactDOM, {createRoot} from './lib/react-dom.js';
 
 
 
+// 반응성 데이터
 
-const childImage = React.createElement(
-  'img',
-  { src: '/icons/handle.svg', alt: '아이템 이동' },
-)
 
-const button = React.createElement(
-  'button',
-  { type: 'button', title: '아이템 이동 가능'},
-  childImage
-)
+const listData = {
+  items: [],
+}
 
-const span = React.createElement(
-  'span',
-  {className:'content'},
-  'Climatology'
-)
+const reactiveListData = new Proxy(listData,{
+  get(target, prop){
+    // console.log(target, prop);
+    
+    return target[prop];
+  },
+  set(target,prop,newValue){
+    const oldValue = target[prop];
+    
+    // console.log(`${oldValue} → ${newValue}`);
+    // const result = Reflect.set(target,prop,newValue);
+    
+    target[prop] = newValue;
 
-const img = React.createElement(
-  'img',
-  {src:'/planet/image-01.jpg', alt:"기후학"}
-)
+    
+    render(); // re-render !!
+    return true;
+  }
+});
 
-const li = React.createElement(
-  'li',
-  {className:'item'},
-  img, span, button
-)
 
-const ul = React.createElement(
-  'ul',
-  {className:'planet'},
-  li
-)
 
-const app = document.getElementById('app');
+const container = document.getElementById('app');
+const reactDomRoot = ReactDOM.createRoot(container);
 
-const reactDomRoot = createRoot(app);
+function render(){
 
-reactDomRoot.render(ul);
-// reactDomRoot.unmount()
+  const children = reactiveListData.items.map(({id,title})=>{
+    const reactElement = createElement(
+        'li',
+        {key:id, className:'item'},
+        createElement('img',{
+          src:`/planet/image-0${id}.jpg`,
+          alt:title
+        }),
+        createElement('span',{
+          className:'content',
+        },title),
+        createElement('button',
+          {type:'button',title:'아이템 이동'},
+          createElement('img',{
+            src:'/icons/handle.svg',
+            alt:'아이템 이동'
+          })
+        ),
+      )
+      return reactElement;
+    })
+
+    const list = createElement(
+      'ul',
+      {className:'planet',lang:'en'},
+      children
+    )
+
+    reactDomRoot.render(list);
+
+}
+
+
+// 최초 마운트 시 실행 (랜더링)
+render();
+
+
+
+setTimeout(() => {
+  reactiveListData.items = [
+    ...reactiveListData.items,
+    {
+      id:1,
+      title:'Life of Earth'
+    }
+  ]
+}, 1000);
+
+
+
+setTimeout(() => {
+  reactiveListData.items = [
+    ...reactiveListData.items,
+    {
+      id:2,
+      title:'Jupiter'
+    }
+  ]
+}, 2000);
+
+
+
+setTimeout(() => {
+  reactiveListData.items = [
+    ...reactiveListData.items,
+    {
+      id:3,
+      title:'화성 가자!'
+    }
+  ]
+}, 3000);
+
+
+
+setTimeout(() => {
+  reactiveListData.items = [
+    ...reactiveListData.items,
+    {
+      id:4,
+      title:'고요한 바다'
+    }
+  ]
+}, 4000);
+
+
+setTimeout(() => {
+  unmount();
+}, 5000);
+
+
+
+function unmount(){
+  reactDomRoot.unmount();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
