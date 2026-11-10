@@ -9,6 +9,9 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`00-basic`](./00-basic) | 실제 DOM과 가상 DOM 비교, `createElement` / `createRoot`를 직접 구현해보는 실습 |
 | [`01-getting-started-react`](./01-getting-started-react) | React 19의 `React.createElement`와 `ReactDOM.createRoot`로 UI(행성 리스트) 렌더링, `Proxy` 반응성 데이터로 재렌더링 |
 | [`02-component-with-props`](./02-component-with-props) | 클래스 컴포넌트와 함수 컴포넌트, `props`로 데이터를 전달해 행성 리스트·아바타 목록 구성 |
+| [`03-react-with-jsx-transform`](./03-react-with-jsx-transform) | `@babel/standalone`으로 브라우저에서 JSX 변환, TypeScript(`"jsx": "react-jsx"`)로 JSX를 `react/jsx-runtime` 호출로 컴파일 |
+| [`04-vite-template`](./04-vite-template) | Vite + React + TypeScript 커스텀 템플릿 구성 (`@` 경로 별칭, 환경 변수 타입, props 타입을 지정한 `Avatar` 컴포넌트) |
+| [`05-html-vs-jsx-markup`](./05-html-vs-jsx-markup) | HTML과 JSX 마크업 비교, Fragment, 텍스트·속성·`style` 데이터 바인딩 실습 (프로필 카드) |
 
 ### 00-basic
 
@@ -32,23 +35,68 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `src/main.js` — `createElement`(`h`)로 페이지 컴포넌트를 렌더링
 - `src/styles/` — 테마, 기본, 아바타, 실습용 CSS
 
+### 03-react-with-jsx-transform
+
+- `src/main.babel.js` — `<script type="text/babel">`과 `@babel/standalone`(CDN)으로 브라우저에서 JSX를 변환해 아바타·행성 컴포넌트 렌더링
+- `src/main.tsx` — JSX로 작성한 `Avatar`, `AvatarListPage` 컴포넌트 (TypeScript 컴파일 원본)
+- `src/main.js` — `tsc`로 `main.tsx`를 컴파일한 결과 (`_jsx` / `_jsxs` 자동 JSX 런타임 호출)
+- `tsconfig.json` — `"jsx": "react-jsx"`, `strict` 등 컴파일 옵션
+- `index.html` — `importmap`으로 `react/jsx-runtime`을 esm.sh에 매핑하고 `src/main.js`를 모듈로 로드
+- `server.js` — Node.js에서 `live-server` API로 개발 서버 실행 (`public/` 마운트)
+- `src/components/`, `src/pages/` — 02에서 이어지는 행성·아바타 컴포넌트와 페이지
+
+### 04-vite-template
+
+- `vite-custom-template/vite.config.ts` — `@vitejs/plugin-react` 설정, `@` → `src` 경로 별칭
+- `vite-custom-template/tsconfig.json` — `moduleResolution: "bundler"`, `paths` 별칭, `vite/client` 타입
+- `vite-custom-template/src/vite-env.d.ts` — `ImportMetaEnv`로 `import.meta.env.VITE_USER_NAME` 타입 선언
+- `vite-custom-template/src/components/Avatar.tsx` — `AvatarProps` 타입(`status` 유니온)을 지정한 아바타 컴포넌트
+- `vite-custom-template/src/pages/AvatarPage.tsx` — `Avatar`를 조합한 아바타 목록 페이지
+- `vite-custom-template/src/main.tsx` — `createRoot`로 `#root`에 페이지 렌더링, `root` 요소가 없으면 경고 출력
+
+### 05-html-vs-jsx-markup
+
+- `src/learn/index.tsx` — `<abbr>`로 HTML·JSX 약어를 표시하는 `Headline`과 학습 페이지 구성
+- `src/learn/DataBinding.tsx` — Fragment(`<>`)와 `{}`로 무작위 상태 메시지 바인딩
+- `src/data/learn.ts` — 상태 메시지, 이미지 타입, 라이브러리 정보 등 타입을 지정한 학습 데이터
+- `src/practice/dataBinding/profileCard.tsx` — 구조 분해 할당, 텍스트·표현식·속성·`style` 객체·중첩 객체·배열 메서드 결과 바인딩, 불리언 출력 처리로 만든 프로필 카드
+- `src/practice/dataBinding/data.ts` — `Profile` 인터페이스와 프로필·오늘의 한마디 데이터
+- `src/utils/getRandom.ts` — 무작위 인덱스를 반환하는 유틸 함수
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
+
 ## 실행 방법
 
 Node.js가 필요합니다. 각 폴더에서 따로 실행합니다.
 
 ```bash
-cd 00-basic            # 또는 01-getting-started-react, 02-component-with-props
+cd 00-basic            # 또는 01-getting-started-react, 02-component-with-props, 03-react-with-jsx-transform
 npm install
 npm run dev
 ```
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`은 Vite 프로젝트입니다.
+
+```bash
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template
+npm install
+npm run dev                # Vite 개발 서버
+npm run build              # 타입 검사(tsc -b) 후 빌드
+npm run lint               # ESLint
+```
+
+`05-html-vs-jsx-markup`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+
 ## 기술
 
-- React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module)
-- live-server (개발 서버)
-- ESLint (`00-basic`)
+- React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
+- React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
+- Vite 8 + `@vitejs/plugin-react` — `04`, `05`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`·`05`는 `tsc -b` 타입 검사)
+- `@babel/standalone` (브라우저 JSX 변환, `03`)
+- live-server (개발 서버, `00`~`03`)
+- ESLint (`00-basic`, `04`, `05`)
 
 ## License
 
