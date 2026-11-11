@@ -11,7 +11,7 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`02-component-with-props`](./02-component-with-props) | 클래스 컴포넌트와 함수 컴포넌트, `props`로 데이터를 전달해 행성 리스트·아바타 목록 구성 |
 | [`03-react-with-jsx-transform`](./03-react-with-jsx-transform) | `@babel/standalone`으로 브라우저에서 JSX 변환, TypeScript(`"jsx": "react-jsx"`)로 JSX를 `react/jsx-runtime` 호출로 컴파일 |
 | [`04-vite-template`](./04-vite-template) | Vite + React + TypeScript 커스텀 템플릿 구성 (`@` 경로 별칭, 환경 변수 타입, props 타입을 지정한 `Avatar` 컴포넌트) |
-| [`05-html-vs-jsx-markup`](./05-html-vs-jsx-markup) | HTML과 JSX 마크업 비교, Fragment, 텍스트·속성·`style` 데이터 바인딩 실습 (프로필 카드) |
+| [`05-html-vs-jsx-markup`](./05-html-vs-jsx-markup) | HTML과 JSX 마크업 비교, Fragment, 텍스트·속성·`style` 데이터 바인딩 실습 (프로필 카드), JSX 속성 규칙, 조건부 렌더링·조건부 표시, 리스트 렌더링(`key`) 실습 (주문 카드) |
 
 ### 00-basic
 
@@ -57,11 +57,20 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 ### 05-html-vs-jsx-markup
 
 - `src/learn/index.tsx` — `<abbr>`로 HTML·JSX 약어를 표시하는 `Headline`과 학습 페이지 구성
+- `src/learn/JSX_Markup.tsx` — 학습 데이터를 구조 분해해 데이터 바인딩·조건부 렌더링·조건부 표시·리스트 렌더링 컴포넌트를 설명 목록(`<dl>`)으로 구성
 - `src/learn/DataBinding.tsx` — Fragment(`<>`)와 `{}`로 무작위 상태 메시지 바인딩
+- `src/learn/JSXAttributes.tsx` — HTML과 JSX 속성 차이 (`htmlFor`, camelCase `tabIndex`·`maxLength`·`readOnly`, `aria-*`·`data-*` 예외, `CSSProperties` 타입 `style` 객체, self closing 태그, boolean 속성)
+- `src/learn/ConditionalRendering.tsx` — `switch`로 이미지 타입별 이미지 결정, `&&`·삼항 연산자로 이미지·스피너 조건부 렌더링, `undefined` 출력 비교 (`PropsWithChildren`)
+- `src/learn/ConditionalDisplay.tsx` — `hidden` 속성으로 `<picture>`(avif / webp / png) 표시 여부 제어, 조건부 렌더링과 조건부 표시 비교
+- `src/learn/RenderList.tsx` — `map`과 `key`로 리스트 렌더링, `toReversed()` 역순 렌더링, `Object.entries`와 `<Fragment key>`로 객체를 설명 목록으로 렌더링
 - `src/data/learn.ts` — 상태 메시지, 이미지 타입, 라이브러리 정보 등 타입을 지정한 학습 데이터
 - `src/practice/dataBinding/profileCard.tsx` — 구조 분해 할당, 텍스트·표현식·속성·`style` 객체·중첩 객체·배열 메서드 결과 바인딩, 불리언 출력 처리로 만든 프로필 카드
 - `src/practice/dataBinding/data.ts` — `Profile` 인터페이스와 프로필·오늘의 한마디 데이터
+- `src/practice/conditionalRendering/OrderCard.tsx` — `if` 조기 반환(취소 주문), 템플릿 리터럴 `className`, 삼항 연산자(회원 배지·버튼), `&&`(배송 중 스피너·요청사항), `couponCount > 0`으로 `0` 출력 방지, `satisfies Record`로 상태 라벨 매핑한 주문 카드
+- `src/practice/conditionalRendering/OrderCard copy.tsx` — 주문 카드 실습 정답 예시
+- `src/practice/conditionalRendering/data.ts` — `OrderStatus` 유니온, `Order` 인터페이스(선택적 `requestMessage?`)와 주문 데이터
 - `src/utils/getRandom.ts` — 무작위 인덱스를 반환하는 유틸 함수
+- `src/utils/isTrueOrFalse.ts` — 무작위 불리언을 반환하는 유틸 함수
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
 ## 실행 방법
