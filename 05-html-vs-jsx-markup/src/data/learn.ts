@@ -16,7 +16,7 @@ export const IMAGE_TYPES:ImageType[] = [
   'next.js',
   'kakao talk'
 ]
-export const imageType:ImageType = 'kakao talk';
+export const imageType:ImageType = 'next.js';
 
 export const isShowReactImage: boolean = true;
 
