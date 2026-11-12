@@ -26,8 +26,13 @@ function Practice():JSX.Element {
       </section>
       <section>
         <h1>Render List</h1>
-        <div>
-          <PlayListCard playlist={playlists[0]}/>
+        <div className='playListCard'>
+          {
+            playlists.map((playList)=>(
+              <PlayListCard key={playList.id} playlist={playList}/>
+            ))
+          }
+          
         </div>
       </section>
     </div>

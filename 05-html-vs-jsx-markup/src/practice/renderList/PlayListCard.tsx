@@ -40,7 +40,8 @@ function PlaylistCard({ playlist }: Props): JSX.Element {
 
   // TODO 3. filter
   //         songs 중 isLiked 가 true 인 곡만 골라 likedSongs 에 담으세요.
-  const likedSongs = songs;
+  const likedSongs = songs.filter((song)=> song.isLiked);
+
 
   return (
     <article className="playlistCard">
@@ -77,10 +78,13 @@ function PlaylistCard({ playlist }: Props): JSX.Element {
       </ol>
 
       <h3>좋아요한 곡 ({likedSongs.length})</h3>
-      {/* TODO 6. 빈 목록 처리 */}
-      <ul className="songs">
-        <li>곡 제목</li>
-      </ul>
+      {/* TODO 6. 빈 목록 처리 리스트 랜더링 + 조건부 랜더링 */}
+      {
+        likedSongs.length > 0 ? 
+        (<ul className="songs"> {likedSongs.map(renderSongItem)} </ul>) : 
+        (<p className='empty'>좋아요를 누른 곡이 없습니다.</p>)
+      }
+      
     </article>
   );
 }
