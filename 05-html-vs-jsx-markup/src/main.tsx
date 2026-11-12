@@ -5,6 +5,6 @@ import Practice from './practice';
 
 
 createRoot(document.getElementById('root')!).render(
-  <Learn />
-  // <Practice />
+  // <Learn />
+  <Practice />
 )
