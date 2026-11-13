@@ -13,7 +13,8 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`04-vite-template`](./04-vite-template) | Vite + React + TypeScript 커스텀 템플릿 구성 (`@` 경로 별칭, 환경 변수 타입, props 타입을 지정한 `Avatar` 컴포넌트) |
 | [`05-html-vs-jsx-markup`](./05-html-vs-jsx-markup) | HTML과 JSX 마크업 비교, Fragment, 텍스트·속성·`style` 데이터 바인딩 실습 (프로필 카드), JSX 속성 규칙, 조건부 렌더링·조건부 표시, 리스트 렌더링(`key`) 실습 (주문 카드·플레이리스트 카드), JSX가 렌더링하는 값·렌더링하지 않는 값 |
 | [`06-component-purity`](./06-component-purity) | 순수 함수와 부수 효과(side-effect) 비교, `StrictMode`의 이중 실행으로 컴포넌트 순수성 확인 |
-| [`07-responding-to-events`](./07-responding-to-events) | 이벤트 핸들러 정의와 JSX prop 전달, `preventDefault`, 이벤트 객체 타입, 이벤트 핸들러를 props로 전달, 컴포넌트 네임스페이스 패턴 |
+| [`07-responding-to-events`](./07-responding-to-events) | 이벤트 핸들러 정의와 JSX prop 전달, `preventDefault`, 이벤트 객체 타입, 이벤트 핸들러를 props로 전달, 컴포넌트 네임스페이스 패턴, `useState`로 상태 기억·업데이터 함수, 이벤트 전파와 `stopPropagation`, 이벤트 핸들러의 부수 효과 |
+| [`08-declarative-programming`](./08-declarative-programming) | 명령형과 선언형 프로그래밍 비교 (DOM 직접 조작 vs 상태 → `render`), `Proxy` 기반 `createState`, React `useState`로 상태(`typing` / `submitting` / `success`)에 따라 그리는 퀴즈 폼 |
 
 ### 00-basic
 
@@ -93,10 +94,25 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 
 - `src/learn/index.tsx` — `NavContents`와 `View`의 하위 컴포넌트로 학습 페이지 구성
 - `src/learn/NavContents.tsx` — 학습 주제 탐색 `<nav>`, 이벤트 핸들러(`React.MouseEvent<HTMLAnchorElement>`) 안에서 `preventDefault`와 DOM 조작 등 부수 효과 처리
-- `src/learn/View.tsx` — 컴포넌트 네임스페이스 패턴(`View.HTMLCode`, `View.RespondingToEvents`), `onSubmit`(`React.FormEvent<HTMLFormElement>`)에서 `preventDefault`, `useState` 상태와 일반 변수 비교
-- `src/learn/responding-to-events/EventHandleProp.tsx` — `onPrintMessage` 이벤트 핸들러 prop을 받아 `<summary>`의 `onMouseEnter` / `onMouseLeave`에 연결
+- `src/learn/View.tsx` — 컴포넌트 네임스페이스 패턴(`View.HTMLCode`, `View.RespondingToEvents`), `onSubmit`(`React.FormEvent<HTMLFormElement>`)에서 `preventDefault`, `form.elements.namedItem`으로 입력값을 읽어 `setText`로 상태 갱신, `useState` 상태와 일반 변수 비교
+- `src/learn/responding-to-events/EventHandleProp.tsx` — `onPrintMessage` 이벤트 핸들러 prop을 받아 `<summary>`의 `onMouseEnter` / `onMouseLeave`에 연결, 상위 컴포넌트의 `setText`(`Dispatch<SetStateAction<string>>`)를 prop으로 받아 하위에서 상태 변경
+- `src/learn/responding-to-events/UseStateCounter.tsx` — 지역 변수와 `useState` 상태 변수 비교(지역 변수는 리렌더링되지 않고 초기화됨), `setCount(count + 1)` 반복과 업데이터 함수 `setCount((prev) => prev + 1)` 비교(batching), 증가·감소·초기화 카운터
+- `src/learn/responding-to-events/EventPropagation.tsx` — 중첩된 `LayoutBox`로 이벤트 전파(버블링) 확인, 화살표 함수로 핸들러에 인수 전달, `e.stopPropagation()`으로 전파 차단
+- `src/learn/responding-to-events/LayoutBox.tsx` — `onClick`, `style`(CSS 사용자 정의 속성 `--color`), `children`과 나머지 props(`...restProps`)를 받는 박스 컴포넌트
+- `src/learn/responding-to-events/EventWithSideEffects.tsx` — 렌더링과 달리 순수할 필요가 없는 이벤트 핸들러에서 부수 효과 처리, `setInterval` / `clearInterval`로 `<output>` 카운트 다운
 - `src/main.tsx` — `StrictMode`로 학습 페이지 렌더링
 - `src/components/Avatar.tsx`, `src/pages/AvatarList.tsx`, `src/data/data.ts` — 06에서 이어지는 아바타 컴포넌트·목록 페이지·데이터
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
+
+### 08-declarative-programming
+
+- `src/programming/imperative-step1.ts` — 체크박스 `change` 이벤트에서 버튼의 `disabled`·텍스트를 직접 바꾸는 명령형 코드
+- `src/programming/imperative.ts` — `insertAdjacentHTML`로 퀴즈 폼을 삽입하고 `show` / `hide` / `enable` / `disable` 헬퍼로 로딩·에러·성공 화면을 하나씩 조작하는 명령형 퀴즈 폼 (`async` / `await`, `try` / `catch` / `finally`)
+- `src/programming/declarative.ts` — 상태 데이터(`checked`)만 보고 UI를 그리는 `render` 함수, `createState`의 `setState`로 상태를 바꾸면 다시 렌더링 (`declare global`로 `globalThis.update` 타입 선언)
+- `src/programming/declarative.tsx` — `useState`로 `answer` / `error` / `status`(`typing` / `submitting` / `success`)를 선언하고 이벤트 핸들러는 상태만 변경, 상태에 따라 `disabled`·로딩·에러 메시지·성공 화면을 선언적으로 렌더링하는 React 퀴즈 폼
+- `src/lib/createState.ts` — `Proxy`로 직접 수정을 막고 `action(key, value)`로만 값을 바꿔 콜백(`render`)을 호출하는 상태 관리 미니 툴 (`createState.js`는 JSDoc 타입 버전)
+- `src/main.tsx` — `StrictMode`로 React 퀴즈 폼을 `#root`에 렌더링
+- `index.html` — 명령형·선언형 체크박스 예제 마크업, `main.tsx`·`imperative.ts`·`declarative.ts`를 모듈로 로드
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
 ## 실행 방법
@@ -111,29 +127,29 @@ npm run dev
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
-`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`는 Vite 프로젝트입니다.
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`은 Vite 프로젝트입니다.
 
 ```bash
-cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming
 npm install
 npm run dev                # Vite 개발 서버
 npm run build              # 타입 검사(tsc -b) 후 빌드
 npm run lint               # ESLint
 ```
 
-`05`~`07`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+`05`~`08`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
 
 ## 기술
 
 - React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
 - React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
-- React 19.1 / ReactDOM 19.1 (npm) — `06`, `07`
+- React 19.1 / ReactDOM 19.1 (npm) — `06`~`08`
 - Vite 8 + `@vitejs/plugin-react` — `04`, `05`
-- Vite 7 + `@vitejs/plugin-react` 4 — `06`, `07`
-- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`07`은 `tsc -b` 타입 검사)
+- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`08`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`08`은 `tsc -b` 타입 검사)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
-- ESLint (`00-basic`, `04`~`07`)
+- ESLint (`00-basic`, `04`~`08`)
 
 ## License
 
