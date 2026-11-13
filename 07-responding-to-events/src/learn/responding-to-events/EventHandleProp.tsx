@@ -2,21 +2,21 @@ import type { Dispatch, SetStateAction } from "react";
 
 
 
-
-
-
 type Props = {
   onPrintMessage: (add:string) => void;
   message:string;
+  text:string;
+  setText:Dispatch<SetStateAction<string>>
 
 }
 
-function EventHandleProp({onPrintMessage, message }:Props) {
+function EventHandleProp({onPrintMessage, message,text, setText }:Props) {
 
 
   const handleMouseEnter = () => {
     // console.log('enter');
-    onPrintMessage('hello');
+    // onPrintMessage('hello');
+    setText('안쪽 컴포넌트에서 setText를 호출했습니다.')
 
   }
 
