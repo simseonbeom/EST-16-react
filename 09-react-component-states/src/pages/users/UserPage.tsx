@@ -1,9 +1,10 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import './UserPage.css';
 import UserList from './components/UserList';
 import userData from '@/data/users.json';
 import UserSearchBox from './components/UserSearchBox';
 import InstantSearch from './components/InstantSearch';
+import UserListCount from './components/UserListCount';
 
 
 function UserPage() {
@@ -33,33 +34,28 @@ function UserPage() {
     )
   )
 
-  console.log( isInstantSearch );
-  
 
   return (
     <div className='UserPage'>
 
-      <InstantSearch onToggle={handleToggleInstantSearch}/>
+      <InstantSearch
+        isInstantSearch={isInstantSearch}
+        onToggle={handleToggleInstantSearch}
+      />
 
       <UserSearchBox
-       onSearch={handleSearch}
-       searchTerm={searchTerm}
-       onReset={handleReset}
+        onSearch={handleSearch}
+        searchTerm={searchTerm}
+        onReset={handleReset}
+        isInstantSearch={isInstantSearch}
       />
 
       <UserList users={searchedUserList}/>
 
-      <div className="UserListCount">
-        <span className="text">
-          <span>검색 결과</span>
-          <span data-testid="user-list-count">
-            23 / <b>23</b>
-          </span>
-        </span>
-        <div className="bar">
-          <span style={{"--ratio":1} as CSSProperties}></span>
-        </div>
-      </div>
+      <UserListCount
+        userCount={searchedUserList.length}
+        totalUserCount={users.length}
+       />
 
 
     </div>

@@ -5,17 +5,16 @@
 // 타입 지정하고 이벤트 연결 
 // 목표는 onSearch에 input값을 전달하자 
 
+import { debounce } from "@/utils/debounce";
 import { useId } from "react";
 
 interface Props {
   onSearch: (userInput:string) => void;
   onReset: () => void;
   searchTerm: string;
+  isInstantSearch:boolean;
 }
-
-
-
-function UserSearchBox({onSearch, searchTerm, onReset}:Props) {
+function UserSearchBox({onSearch, searchTerm, onReset, isInstantSearch}:Props) {
 
   const id = useId();
 
@@ -34,6 +33,8 @@ function UserSearchBox({onSearch, searchTerm, onReset}:Props) {
     input.value = '';
     input.focus();
   }
+  const handleChange = debounce((e:React.ChangeEvent<HTMLInputElement>) => 
+    onSearch(e.target.value),300)
 
   return (
     <form className="UserSearchBox" onSubmit={handleSearch}>
@@ -44,6 +45,7 @@ function UserSearchBox({onSearch, searchTerm, onReset}:Props) {
           id={id} 
           placeholder='사용자 정보 입력' 
           defaultValue={searchTerm}
+          onChange={isInstantSearch ? handleChange : undefined}
         />
       </div>
       <button type="submit">찾기</button>

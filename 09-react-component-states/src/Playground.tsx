@@ -1,11 +1,13 @@
-import UserPage from "./pages/users/UserPage";
+import ProductPage from "./pages/products/ProductPage";
+// import UserPage from "./pages/users/UserPage";
 
 
 
 function Playground() {
   return (
     <div style={styles}>
-      <UserPage />
+      {/* <UserPage /> */}
+      <ProductPage />
     </div>
   )
 }

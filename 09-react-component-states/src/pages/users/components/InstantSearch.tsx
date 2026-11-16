@@ -4,11 +4,12 @@ import { useId } from "react"
 
 interface Props {
   onToggle: () => void;
+  isInstantSearch:boolean;
 }
 
 
 
-function InstantSearch({onToggle}:Props) {
+function InstantSearch({onToggle,isInstantSearch}:Props) {
 
   const id = useId()
 
@@ -17,7 +18,7 @@ function InstantSearch({onToggle}:Props) {
         <h1>사용자 목록</h1>
         <div className="formControl InstantSearch">
           <label htmlFor={id}>
-            <input type="checkbox" id={id} onChange={onToggle}/>
+            <input type="checkbox" checked={isInstantSearch} id={id} onChange={onToggle}/>
           </label>
         </div>
       </header>
