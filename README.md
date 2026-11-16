@@ -15,6 +15,7 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`06-component-purity`](./06-component-purity) | 순수 함수와 부수 효과(side-effect) 비교, `StrictMode`의 이중 실행으로 컴포넌트 순수성 확인 |
 | [`07-responding-to-events`](./07-responding-to-events) | 이벤트 핸들러 정의와 JSX prop 전달, `preventDefault`, 이벤트 객체 타입, 이벤트 핸들러를 props로 전달, 컴포넌트 네임스페이스 패턴, `useState`로 상태 기억·업데이터 함수, 이벤트 전파와 `stopPropagation`, 이벤트 핸들러의 부수 효과 |
 | [`08-declarative-programming`](./08-declarative-programming) | 명령형과 선언형 프로그래밍 비교 (DOM 직접 조작 vs 상태 → `render`), `Proxy` 기반 `createState`, React `useState`로 상태(`typing` / `submitting` / `success`)에 따라 그리는 퀴즈 폼 |
+| [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 상태 연결 실습 마크업 |
 
 ### 00-basic
 
@@ -115,6 +116,23 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `index.html` — 명령형·선언형 체크박스 예제 마크업, `main.tsx`·`imperative.ts`·`declarative.ts`를 모듈로 로드
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
+### 09-react-component-states
+
+- `src/pages/users/UserPage.tsx` — `useState`로 `searchTerm` / `users` / `isInstantSearch` 상태 선언, 상태 업데이트 핸들러를 하위 컴포넌트에 전달(상태 끌어올리기), `filter` + `some`으로 이름·이메일·도시를 대소문자 구분 없이 검색한 파생 상태 `searchedUserList`
+- `src/pages/users/components/UserSearchBox.tsx` — `onSubmit`에서 `preventDefault` 후 입력값 검증(`trim`, 빈 값 `alert`)과 `onSearch` 호출, 목록 초기화(`onReset`), 즉시 검색 모드일 때만 `debounce`(300ms)를 적용한 `onChange` 연결, `useId`로 `label`·`input` 연결
+- `src/pages/users/components/InstantSearch.tsx` — `checked`를 상위 상태(`isInstantSearch`)로 제어하는 즉시 검색 토글 체크박스 (제어 컴포넌트)
+- `src/pages/users/components/UserList.tsx`, `UserItem.tsx` — `map`과 `key`로 사용자 목록 렌더링, CSS 사용자 정의 속성(`--i`, `--hue`)으로 항목별 애니메이션 순서·색상 지정
+- `src/pages/users/components/UserListCount.tsx` — 검색 결과 수 / 전체 수 출력, 비율(`--ratio`)로 진행 막대 표시 (전체 수 `0`일 때 나눗셈 방지)
+- `src/pages/users/types/user.ts` — `UserType` 타입
+- `src/pages/products/ProductPage.tsx` — 상품 검색·재고 필터·표시 개수를 컴포넌트로 분리하고 상태를 연결하는 실습용 정적 마크업
+- `src/pages/products/data.ts` — 상품 데이터 (`name`, `price`, `inStock`)
+- `src/utils/debounce.ts` — 마지막 호출 후 일정 시간 뒤에 실행하는 `debounce` (제네릭 `Parameters<T>`·`ReturnType` 타입 예시 포함)
+- `src/utils/throttle.ts` — 일정 시간 동안 한 번만 실행하는 `throttle`
+- `src/utils/convertSlug.ts`, `convertTextToHTMLString.ts` — 공백을 `-`로 바꾸는 슬러그 변환, 텍스트 ↔ HTML 문자열 변환 (`escapeHTML`로 XSS 방지)
+- `src/data/users.json`, `notes.json` — 사용자·노트 데이터
+- `src/Playground.tsx`, `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 페이지(`ProductPage` / `UserPage`) 렌더링
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
+
 ## 실행 방법
 
 Node.js가 필요합니다. 각 폴더에서 따로 실행합니다.
@@ -127,29 +145,29 @@ npm run dev
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
-`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`은 Vite 프로젝트입니다.
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`는 Vite 프로젝트입니다.
 
 ```bash
-cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states
 npm install
 npm run dev                # Vite 개발 서버
 npm run build              # 타입 검사(tsc -b) 후 빌드
 npm run lint               # ESLint
 ```
 
-`05`~`08`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+`05`~`09`는 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
 
 ## 기술
 
 - React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
 - React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
-- React 19.1 / ReactDOM 19.1 (npm) — `06`~`08`
+- React 19.1 / ReactDOM 19.1 (npm) — `06`~`09`
 - Vite 8 + `@vitejs/plugin-react` — `04`, `05`
-- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`08`
-- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`08`은 `tsc -b` 타입 검사)
+- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`09`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`09`는 `tsc -b` 타입 검사)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
-- ESLint (`00-basic`, `04`~`08`)
+- ESLint (`00-basic`, `04`~`09`)
 
 ## License
 
