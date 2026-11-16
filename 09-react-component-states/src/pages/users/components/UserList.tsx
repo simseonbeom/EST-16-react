@@ -1,16 +1,26 @@
+import type { UserType } from "../types/user"
+import UserItem from "./UserItem"
 
+interface Prop{
+  users: UserType[]
+}
 
-function UserList() {
+function UserList({users}:Prop) {
+
+  
+  
   return (
     <ul className="UserList">
-      <li>
-        <span className="avatar-initial">사토 히데오</span>
-        <span className="info">
-          <strong>사토 히데오</strong>
-          <a href="">sato@gmail.com</a>
-        </span>
-        <span className="city">대한민국</span>
-      </li>
+      {
+        users.map((user,index)=>(
+          <UserItem 
+            key={user.id}
+            user={user}
+            index={index}
+          />
+        ))
+      }
+      
     </ul>
   )
 }

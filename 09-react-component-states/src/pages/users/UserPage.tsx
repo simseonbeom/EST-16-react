@@ -1,14 +1,21 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import './UserPage.css';
 import UserList from './components/UserList';
 import userData from '@/data/users.json';
+import UserSearchBox from './components/UserSearchBox';
 
 
 function UserPage() {
+  
+  // [상태 선언]
+  const [searchTerm, setSearchTerm] = useState('');
 
-  console.log( userData );
-  
-  
+
+  // [상태 업데이트]
+  // 컴포넌트 상태를 업데이트 하는 곳 
+  const handleSearch = (userInput:string) => setSearchTerm(userInput);
+
+
   return (
     <div className='UserPage'>
 
@@ -21,16 +28,9 @@ function UserPage() {
         </div>
       </header>
 
-      <form className="UserSearchBox">
-        <div className="control">
-          <label htmlFor="a-20">사용자 검색</label>
-          <input type="search" id='a-20' placeholder='사용자 정보 입력' />
-        </div>
-        <button type="submit">찾기</button>
-        <button type="reset">목록 초기화</button>
-      </form>
+      <UserSearchBox 검색기능={handleSearch}/>
 
-      <UserList/>
+      <UserList users={userData}/>
 
       <div className="UserListCount">
         <span className="text">
