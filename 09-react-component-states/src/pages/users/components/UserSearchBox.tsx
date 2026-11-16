@@ -5,26 +5,49 @@
 // 타입 지정하고 이벤트 연결 
 // 목표는 onSearch에 input값을 전달하자 
 
+import { useId } from "react";
+
 interface Props {
-  검색기능: (userInput:string) => void;
+  onSearch: (userInput:string) => void;
+  onReset: () => void;
+  searchTerm: string;
 }
 
 
-function UserSearchBox({검색기능}:Props) {
 
-  
+function UserSearchBox({onSearch, searchTerm, onReset}:Props) {
 
+  const id = useId();
+
+  const handleSearch = (e:React.FormEvent<HTMLFormElement>)=>{
+
+    e.preventDefault();
+    const input = document.getElementById(id) as HTMLInputElement;
+    const value = input.value.trim();
+
+    if(value.length > 0){
+      onSearch(value);
+    }else{
+      alert('검색어를 입력해주세요.');
+    }
+
+    input.value = '';
+    input.focus();
+  }
 
   return (
-    <form className="UserSearchBox" onSubmit={()=> 
-      검색기능()
-    }>
+    <form className="UserSearchBox" onSubmit={handleSearch}>
       <div className="control">
-        <label htmlFor="a-20">사용자 검색</label>
-        <input type="search" id='a-20' placeholder='사용자 정보 입력' />
+        <label htmlFor={id}>사용자 검색</label>
+        <input 
+          type="search" 
+          id={id} 
+          placeholder='사용자 정보 입력' 
+          defaultValue={searchTerm}
+        />
       </div>
       <button type="submit">찾기</button>
-      <button type="reset">목록 초기화</button>
+      <button type="reset" onClick={onReset}>목록 초기화</button>
     </form>
   )
 }
