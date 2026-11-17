@@ -1,49 +1,38 @@
-import "./ProductPage.css";
+import { useState } from "react";
+import ProductList from "./components/ProductList";
+import StockFilter from "./components/StockFilter";
+import productData from "./data";
 
-/*
-  [실습] 아래 마크업을 컴포넌트로 분리하고, 상태를 연결해 보세요.
-  - 상품 데이터: ./data.ts 의 productData
-  - 검색어로 상품 이름 필터링
-  - "재고 있는 상품만 보기" 체크 시 재고 있는 상품만 표시
-  - 표시 개수 / 전체 개수 출력
-*/
+import "./ProductPage.css";
+import ProductSearch from "./components/ProductSearch";
+import ProductCount from "./components/ProductCount";
 
 function ProductPage() {
+  const [products] = useState(productData);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [onlyInStock, setOnlyInStock] = useState(false);
+
+  const handleSearch = (userInput: string) => setSearchTerm(userInput);
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.includes(searchTerm.trim());
+    const matchesStock = onlyInStock ? product.inStock : true;
+    return matchesSearch && matchesStock;
+  });
+
+  const handleToggleStock = () => setOnlyInStock(!onlyInStock);
+
   return (
     <div className="ProductPage">
       <h1>상품 목록</h1>
 
-      <div className="ProductSearch">
-        <label htmlFor="product-search">상품 검색</label>
-        <input id="product-search" type="search" placeholder="상품 이름 입력" />
-      </div>
+      <ProductSearch searchTerm={searchTerm} onSearch={handleSearch} />
 
-      <div className="StockFilter">
-        <input type="checkbox" id="stock-filter" />
-        <label htmlFor="stock-filter">재고 있는 상품만 보기</label>
-      </div>
+      <StockFilter onlyInStock={onlyInStock} onToggle={handleToggleStock} />
 
-      <ul className="ProductList">
-        <li>
-          <strong>무선 키보드</strong>
-          <span className="price">45,000원</span>
-          <span className="badge">재고 있음</span>
-        </li>
-        <li className="sold-out">
-          <strong>무선 마우스</strong>
-          <span className="price">25,000원</span>
-          <span className="badge">품절</span>
-        </li>
-        <li>
-          <strong>모니터 받침대</strong>
-          <span className="price">32,000원</span>
-          <span className="badge">재고 있음</span>
-        </li>
-      </ul>
+      <ProductList products={filteredProducts} />
 
-      <p className="ProductCount">
-        전체 <b>8</b>개 중 <b>3</b>개 표시
-      </p>
+      <ProductCount count={filteredProducts.length} total={products.length} />
     </div>
   );
 }
