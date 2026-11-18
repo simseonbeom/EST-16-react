@@ -15,7 +15,8 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`06-component-purity`](./06-component-purity) | 순수 함수와 부수 효과(side-effect) 비교, `StrictMode`의 이중 실행으로 컴포넌트 순수성 확인 |
 | [`07-responding-to-events`](./07-responding-to-events) | 이벤트 핸들러 정의와 JSX prop 전달, `preventDefault`, 이벤트 객체 타입, 이벤트 핸들러를 props로 전달, 컴포넌트 네임스페이스 패턴, `useState`로 상태 기억·업데이터 함수, 이벤트 전파와 `stopPropagation`, 이벤트 핸들러의 부수 효과 |
 | [`08-declarative-programming`](./08-declarative-programming) | 명령형과 선언형 프로그래밍 비교 (DOM 직접 조작 vs 상태 → `render`), `Proxy` 기반 `createState`, React `useState`로 상태(`typing` / `submitting` / `success`)에 따라 그리는 퀴즈 폼 |
-| [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 컴포넌트 분리·상태 연결 (검색·재고 필터·표시 개수), 상태 기반 라우팅과 객체 상태 폼으로 만든 노트 앱 (목록·상세·작성) |
+| [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 컴포넌트 분리·상태 연결 (검색·재고 필터·표시 개수), 상태 기반 라우팅과 객체 상태 폼으로 만든 노트 앱 (목록·상세·작성·수정·삭제) |
+| [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화 |
 
 ### 00-basic
 
@@ -129,17 +130,27 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `src/pages/products/components/ProductList.tsx`, `ProductItem.tsx` — `map`과 `key`로 상품 목록 렌더링, `inStock`에 따라 `sold-out` 클래스·배지 텍스트 결정, `toLocaleString()`으로 가격 표시
 - `src/pages/products/components/ProductCount.tsx` — 표시 개수 / 전체 개수 출력
 - `src/pages/products/types/product.ts`, `data.ts` — `ProductType` 타입과 타입을 지정한 상품 데이터 (`name`, `price`, `inStock`)
-- `src/NoteApp/App.tsx` — `useState`로 노트 목록(지연 초기화 `useState(() => getNoteList())`)과 `routeInfo`(`route` / `noteId`) 상태 관리, `switch`로 라우트별 페이지 렌더링하는 상태 기반 라우팅, 노트 추가 핸들러와 파생 상태 `newNoteId`
+- `src/NoteApp/App.tsx` — `useState`로 노트 목록(지연 초기화 `useState(() => getNoteList())`)과 `routeInfo`(`route` / `noteId`) 상태 관리, `switch`로 라우트별 페이지 렌더링하는 상태 기반 라우팅, 노트 추가(전개 연산자)·수정(`map`)·삭제(`filter`) 핸들러로 불변 업데이트, 파생 상태 `newNoteId`(`Math.max`로 최대 id + 1)·`selectedNote`(`find`), 컴포넌트 구조 다이어그램 주석
 - `src/NoteApp/routes.ts` — `as const`로 선언한 라우트 상수 (`list` / `detail` / `create` / `edit`)
 - `src/NoteApp/api/getNote.ts`, `getUser.ts` — `notes.json`에 작성자 정보(`expand.user`)를 합친 노트 목록·단일 노트 조회, 사용자 목록·단일 사용자 조회 (`typeof` 기반 `Note` 타입)
-- `src/NoteApp/pages/NoteListPage.tsx`, `NoteDetailPage.tsx`, `NoteCreatePage.tsx` — 노트 목록·상세(`dangerouslySetInnerHTML`로 HTML 본문 출력, 노트가 없으면 에러 표시)·작성 페이지, `onChangeRoute`로 페이지 전환
-- `src/NoteApp/components/NoteForm.tsx` — 여러 입력(`input` / `textarea` / `select`)을 객체 상태 하나로 관리, 계산된 속성명(`[name]: value`)으로 불변 업데이트, `onReset`에서 상태 초기화
+- `src/NoteApp/pages/NoteListPage.tsx`, `NoteDetailPage.tsx`, `NoteCreatePage.tsx` — 노트 목록·상세(상위 상태의 `note`를 받아 `dangerouslySetInnerHTML`로 HTML 본문 출력, 노트가 없으면 에러 표시, 수정 링크로 편집 페이지 이동)·작성 페이지, `onChangeRoute`로 페이지 전환
+- `src/NoteApp/pages/NoteEditPage.tsx` — 선택한 노트와 `onEdit` / `onDelete` 핸들러를 `NoteForm`(`mode='edit'`)에 전달하는 노트 편집 페이지
+- `src/NoteApp/components/NoteForm.tsx` — 여러 입력(`input` / `textarea` / `select`)을 객체 상태 하나로 관리, 계산된 속성명(`[name]: value`)으로 불변 업데이트, `onReset`에서 상태 초기화, `mode`(`create` / `edit`)에 따라 초기값(지연 초기화, `convertHTMLToText`)·`onSubmit` 핸들러·작성자 선택 표시·버튼(추가·초기화 / 수정·삭제) 분기, 제출 시 `convertTextToHTMLString`으로 본문 변환
 - `src/NoteApp/components/NoteList.tsx`, `BackLink.tsx`, `PrintError.tsx` — 핸들러를 반환하는 함수(`handleClick(id)`)로 상세 이동하는 노트 목록, `preventDefault` 후 목록으로 돌아가는 링크, `role="alert"` 에러 메시지
 - `src/utils/debounce.ts` — 마지막 호출 후 일정 시간 뒤에 실행하는 `debounce` (제네릭 `Parameters<T>`·`ReturnType` 타입 예시 포함)
 - `src/utils/throttle.ts` — 일정 시간 동안 한 번만 실행하는 `throttle`
 - `src/utils/convertSlug.ts`, `convertTextToHTMLString.ts` — 공백을 `-`로 바꾸는 슬러그 변환, 텍스트 ↔ HTML 문자열 변환 (`escapeHTML`로 XSS 방지)
 - `src/data/users.json`, `notes.json` — 사용자·노트 데이터
 - `src/Playground.tsx`, `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 페이지(`NoteApp` / `ProductPage` / `UserPage`) 렌더링
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
+
+### 10-snapshot
+
+- `src/components/Counter.tsx` — 렌더링 시점의 State를 찍어 두는 스냅샷 개념(`setNumber(number + 5)` 후에도 현재 렌더링의 `number`는 그대로), 업데이터 함수(`n => n + 5`) 반복 호출과 비교, `useState(slowInit)` 지연 초기화로 초기값 계산을 첫 렌더링에만 실행
+- `src/components/Form.tsx` — 초기 상태 객체를 계산하는 함수로 지연 초기화, 전개 연산자(`...form`)로 객체 상태 불변 업데이트한 제어 입력
+- `src/components/memo-1/Parent.tsx`, `Child.tsx` — 부모 리렌더링 시 자식도 리렌더링되는 동작 확인, `memo`로 감싼 자식에 `useCallback(fn, [])`으로 기억한 함수를 props로 전달해 불필요한 리렌더링 방지 (의존성 배열 비교 설명)
+- `src/components/memo-2/Parent.tsx`, `Child.tsx` — `memo` 자식에 배열 props 전달 시 참조 유지 방법 비교 (`useMemo`로 배열 기억 vs 컴포넌트 밖 상수 `STUDENTS`), `memo`(컴포넌트)·`useCallback`(함수)·`useMemo`(배열·객체·계산값) 용도 정리
+- `src/Playground.tsx`, `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 컴포넌트(`Counter` / `Form` / `Parent`) 렌더링
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
 ## 실행 방법
@@ -154,29 +165,29 @@ npm run dev
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
-`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`는 Vite 프로젝트입니다.
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`은 Vite 프로젝트입니다.
 
 ```bash
-cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot
 npm install
 npm run dev                # Vite 개발 서버
 npm run build              # 타입 검사(tsc -b) 후 빌드
 npm run lint               # ESLint
 ```
 
-`05`~`09`는 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+`05`~`10`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
 
 ## 기술
 
 - React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
 - React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
-- React 19.1 / ReactDOM 19.1 (npm) — `06`~`09`
+- React 19.1 / ReactDOM 19.1 (npm) — `06`~`10`
 - Vite 8 + `@vitejs/plugin-react` — `04`, `05`
-- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`09`
-- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`09`는 `tsc -b` 타입 검사)
+- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`10`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`10`은 `tsc -b` 타입 검사)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
-- ESLint (`00-basic`, `04`~`09`)
+- ESLint (`00-basic`, `04`~`10`)
 
 ## License
 
