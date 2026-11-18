@@ -27,9 +27,6 @@ import NoteEditPage from './pages/NoteEditPage';
   (작성 → create)    (수정 → edit)
 
 
-
-
-
 */
 
 function NoteApp() {
