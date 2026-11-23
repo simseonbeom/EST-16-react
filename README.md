@@ -16,7 +16,8 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`07-responding-to-events`](./07-responding-to-events) | 이벤트 핸들러 정의와 JSX prop 전달, `preventDefault`, 이벤트 객체 타입, 이벤트 핸들러를 props로 전달, 컴포넌트 네임스페이스 패턴, `useState`로 상태 기억·업데이터 함수, 이벤트 전파와 `stopPropagation`, 이벤트 핸들러의 부수 효과 |
 | [`08-declarative-programming`](./08-declarative-programming) | 명령형과 선언형 프로그래밍 비교 (DOM 직접 조작 vs 상태 → `render`), `Proxy` 기반 `createState`, React `useState`로 상태(`typing` / `submitting` / `success`)에 따라 그리는 퀴즈 폼 |
 | [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 컴포넌트 분리·상태 연결 (검색·재고 필터·표시 개수), 상태 기반 라우팅과 객체 상태 폼으로 만든 노트 앱 (목록·상세·작성·수정·삭제) |
-| [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화 |
+| [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화, 제어·비제어 입력 비교 |
+| [`11-fetching-data`](./11-fetching-data) | `useEffect`로 부수 효과·정리(cleanup) 함수, `fetch` + `AbortController`로 데이터 가져오기 (로딩·에러 상태), `useRef`로 DOM 참조·`ref` prop 전달, `useEffect` + `useRef`로 채팅 스크롤, `useLayoutEffect`로 레이아웃 측정, 컴포넌트 라이프사이클 시각화 |
 
 ### 00-basic
 
@@ -150,7 +151,21 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `src/components/Form.tsx` — 초기 상태 객체를 계산하는 함수로 지연 초기화, 전개 연산자(`...form`)로 객체 상태 불변 업데이트한 제어 입력
 - `src/components/memo-1/Parent.tsx`, `Child.tsx` — 부모 리렌더링 시 자식도 리렌더링되는 동작 확인, `memo`로 감싼 자식에 `useCallback(fn, [])`으로 기억한 함수를 props로 전달해 불필요한 리렌더링 방지 (의존성 배열 비교 설명)
 - `src/components/memo-2/Parent.tsx`, `Child.tsx` — `memo` 자식에 배열 props 전달 시 참조 유지 방법 비교 (`useMemo`로 배열 기억 vs 컴포넌트 밖 상수 `STUDENTS`), `memo`(컴포넌트)·`useCallback`(함수)·`useMemo`(배열·객체·계산값) 용도 정리
-- `src/Playground.tsx`, `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 컴포넌트(`Counter` / `Form` / `Parent`) 렌더링
+- `src/components/memo-3/App.tsx`, `List.tsx`, `ListItem.tsx` — `useMemo`로 `count`에 의존하는 배열 기억, `useCallback`으로 클릭 핸들러 기억, `memo`로 감싼 목록·항목 컴포넌트의 리렌더링 확인
+- `src/components/controlled/Form.tsx` — `value` + `onChange`로 React가 제어하는 제어 입력과 `defaultValue`로 첫 값만 반영하는 비제어 입력 비교 (폼 리셋·검증·자동완성엔 `value` 권장)
+- `src/Playground.tsx`, `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 컴포넌트(`Counter` / `Form` / `Parent` / `App` / `controlled/Form`) 렌더링
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
+
+### 11-fetching-data
+
+- `src/components/effect/Effect-step01.tsx` — `useEffect` 의존성 배열별 실행 시점(생략 시 매 렌더링, `[]`는 마운트 후 한 번, `[count]`는 값 변경 시), 정리 함수에서 `clearInterval`로 `setInterval` 청소
+- `src/components/effect/Effect.tsx` — `useEffect`에서 `fetch`로 JSONPlaceholder 사용자 목록 가져오기, `users` / `loading` / `error` 상태로 로딩·에러·목록 렌더링, `res.ok` 검사, `AbortController`로 언마운트 시 요청 취소(`AbortError` 무시)
+- `src/components/ref/Parent.tsx`, `Child.tsx` — `useRef`로 DOM 요소를 선언형으로 참조해 `focus()`, React 19의 `ref` prop 전달과 React 18의 `forwardRef` 비교
+- `src/components/effectAndRef/Parent.tsx`, `Child.tsx` — 메시지 추가 시 `useEffect`에서 `ref`로 잡은 스크롤 박스를 `scrollTo({ top: scrollHeight, behavior: 'smooth' })`로 맨 아래 이동하는 채팅방 (`scrollIntoView` 방식 비교, `memo` 자식)
+- `src/components/layoutEffect/Parent.tsx` — 렌더링 → DOM 업데이트 → `useLayoutEffect` → 화면 그리기 → `useEffect` 실행 순서 확인, `getBoundingClientRect()`로 박스 높이 측정 (툴팁 위치·크기 측정·스크롤 조정 등 용도)
+- `src/react-lifecycle.html` — 라이프사이클 지도, 단계별 실행, 부모·자식 실행 순서를 보여주는 React 컴포넌트 라이프사이클 시각화 페이지
+- `src/@types/global.d.ts` — `declare global`로 선언한 `User` 타입과 `Address`·`Geo`·`Company` 인터페이스
+- `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 컴포넌트(`Effect` / `ref` / `effectAndRef` / `layoutEffect`) 렌더링
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
 ## 실행 방법
@@ -165,29 +180,29 @@ npm run dev
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
-`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`은 Vite 프로젝트입니다.
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`, `11-fetching-data`는 Vite 프로젝트입니다.
 
 ```bash
-cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot, 11-fetching-data
 npm install
 npm run dev                # Vite 개발 서버
 npm run build              # 타입 검사(tsc -b) 후 빌드
 npm run lint               # ESLint
 ```
 
-`05`~`10`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+`05`~`11`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
 
 ## 기술
 
 - React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
 - React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
-- React 19.1 / ReactDOM 19.1 (npm) — `06`~`10`
+- React 19.1 / ReactDOM 19.1 (npm) — `06`~`11`
 - Vite 8 + `@vitejs/plugin-react` — `04`, `05`
-- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`10`
-- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`10`은 `tsc -b` 타입 검사)
+- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`11`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`11`은 `tsc -b` 타입 검사)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
-- ESLint (`00-basic`, `04`~`10`)
+- ESLint (`00-basic`, `04`~`11`)
 
 ## License
 
