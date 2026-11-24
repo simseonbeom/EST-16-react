@@ -17,7 +17,8 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`08-declarative-programming`](./08-declarative-programming) | 명령형과 선언형 프로그래밍 비교 (DOM 직접 조작 vs 상태 → `render`), `Proxy` 기반 `createState`, React `useState`로 상태(`typing` / `submitting` / `success`)에 따라 그리는 퀴즈 폼 |
 | [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 컴포넌트 분리·상태 연결 (검색·재고 필터·표시 개수), 상태 기반 라우팅과 객체 상태 폼으로 만든 노트 앱 (목록·상세·작성·수정·삭제) |
 | [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화, 제어·비제어 입력 비교 |
-| [`11-fetching-data`](./11-fetching-data) | `useEffect`로 부수 효과·정리(cleanup) 함수, `fetch` + `AbortController`로 데이터 가져오기 (로딩·에러 상태), `useRef`로 DOM 참조·`ref` prop 전달, `useEffect` + `useRef`로 채팅 스크롤, `useLayoutEffect`로 레이아웃 측정, 컴포넌트 라이프사이클 시각화 |
+| [`11-fetching-data`](./11-fetching-data) | `useEffect`로 부수 효과·정리(cleanup) 함수, `fetch` + `AbortController`로 데이터 가져오기 (로딩·에러 상태), `useRef`로 DOM 참조·`ref` prop 전달, `useEffect` + `useRef`로 채팅 스크롤, `useLayoutEffect`로 레이아웃 측정, 컴포넌트 라이프사이클 시각화, 커스텀 훅(`useUsers`)으로 데이터 가져오기 로직 분리, Context API로 prop drilling 없이 사용자·테마 공유 (`use`, Provider 컴포넌트, 커스텀 훅) |
+| [`12-react-with-supabase`](./12-react-with-supabase) | Supabase 클라이언트 연결(`createClient`, 환경 변수, `Database` 타입), Context 기반 직접 구현 라우터(`RouterProvider` / `NavLink` / `history.pushState`), GSAP(`useGSAP`, `gsap.context`)으로 진입 애니메이션을 적용한 쇼핑몰 레이아웃 |
 
 ### 00-basic
 
@@ -159,13 +160,35 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 ### 11-fetching-data
 
 - `src/components/effect/Effect-step01.tsx` — `useEffect` 의존성 배열별 실행 시점(생략 시 매 렌더링, `[]`는 마운트 후 한 번, `[count]`는 값 변경 시), 정리 함수에서 `clearInterval`로 `setInterval` 청소
-- `src/components/effect/Effect.tsx` — `useEffect`에서 `fetch`로 JSONPlaceholder 사용자 목록 가져오기, `users` / `loading` / `error` 상태로 로딩·에러·목록 렌더링, `res.ok` 검사, `AbortController`로 언마운트 시 요청 취소(`AbortError` 무시)
+- `src/components/effect/Effect.tsx` — 커스텀 훅 `useUsers`가 반환한 `users` / `loading` / `error`로 로딩·에러·목록 렌더링 (컴포넌트는 "무엇을 보여줄지", 훅은 "어떻게 가져올지"로 관심사 분리)
+- `src/hook/useUsers.ts` — `useEffect`에서 `fetch`로 JSONPlaceholder 사용자 목록 가져오기, `res.ok` 검사, `AbortController`로 언마운트 시 요청 취소(`AbortError` 무시)하는 데이터 가져오기 커스텀 훅
+- `src/components/context/App.tsx`, `Parent.tsx`, `Child.tsx`, `GrandChild.tsx` — `<ThemeProvider>`와 `<UserContext value>`로 감싸 props 전달 없이 손자 컴포넌트에서 사용자 이름·테마 사용, 버튼으로 사용자 변경·테마 전환 (`useContext`(React 18+) / `use`(React 19+) 비교)
+- `src/components/context/UserContext.tsx` — `UserContextType` 인터페이스와 `createContext<UserContextType | null>(null)`
+- `src/components/context/ThemeContext.tsx` — `light` / `dark` 상태와 `toggleTheme`을 제공하는 `ThemeProvider` 컴포넌트, Provider 밖에서 사용 시 에러를 던지는 `useTheme` 훅
+- `src/components/context/themes.ts` — `lightTheme` / `darkTheme` 색상·간격 객체와 `typeof`로 만든 `ThemeType`
+- `src/hook/useUserContext.tsx` — `use(UserContext)`로 컨텍스트를 읽고 `null`이면 에러를 던지는 커스텀 훅
 - `src/components/ref/Parent.tsx`, `Child.tsx` — `useRef`로 DOM 요소를 선언형으로 참조해 `focus()`, React 19의 `ref` prop 전달과 React 18의 `forwardRef` 비교
 - `src/components/effectAndRef/Parent.tsx`, `Child.tsx` — 메시지 추가 시 `useEffect`에서 `ref`로 잡은 스크롤 박스를 `scrollTo({ top: scrollHeight, behavior: 'smooth' })`로 맨 아래 이동하는 채팅방 (`scrollIntoView` 방식 비교, `memo` 자식)
 - `src/components/layoutEffect/Parent.tsx` — 렌더링 → DOM 업데이트 → `useLayoutEffect` → 화면 그리기 → `useEffect` 실행 순서 확인, `getBoundingClientRect()`로 박스 높이 측정 (툴팁 위치·크기 측정·스크롤 조정 등 용도)
 - `src/react-lifecycle.html` — 라이프사이클 지도, 단계별 실행, 부모·자식 실행 순서를 보여주는 React 컴포넌트 라이프사이클 시각화 페이지
 - `src/@types/global.d.ts` — `declare global`로 선언한 `User` 타입과 `Address`·`Geo`·`Company` 인터페이스
-- `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 컴포넌트(`Effect` / `ref` / `effectAndRef` / `layoutEffect`) 렌더링
+- `src/main.tsx` — `StrictMode`로 `#react-app`에 실습 컴포넌트(`Effect` / `ref` / `effectAndRef` / `layoutEffect` / `context/App`) 렌더링
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
+
+### 12-react-with-supabase
+
+- `src/supabase/supabase.tsx` — `import.meta.env`의 `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`로 `createClient<Database>` Supabase 클라이언트 생성
+- `src/supabase/database.types.ts` — Supabase CLI로 생성한 `Database` 타입 (`products` 테이블 `Row` / `Insert` / `Update`)
+- `src/vite-env.d.ts` — `ImportMetaEnv`로 Supabase 환경 변수 타입 선언
+- `src/router/RouterProvider/index.tsx` — `RouterContext`로 현재 경로·`setHistoryRoute`·`params` 공유, `:param` 패턴을 정규식으로 매칭, `popstate` 이벤트 구독(`useLayoutEffect`), `useMemo`로 컨텍스트 값 기억, `useRouter` / `useParams` 훅
+- `src/router/RouterProvider/NotFound.tsx` — 일치하는 라우트가 없을 때 보여주는 404 페이지
+- `src/router/router.tsx` — `title` / `path` / `element`로 구성한 라우트 목록 (메인·상품목록·고객지원·로그인·회원가입)
+- `src/components/NavLink.tsx` — `preventDefault` 후 `setHistoryRoute`와 `history.pushState`로 새로고침 없이 이동, 현재 경로면 활성 클래스 적용
+- `src/components/Layout/Header.tsx`, `Footer.tsx` — `routes.map`으로 메인 메뉴를 그리는 헤더와 푸터 (CSS Modules)
+- `src/pages/Home.tsx` — `useGSAP`(`scope`: `ref`)으로 제목·문구를 `stagger` 페이드 업하는 메인 페이지
+- `src/pages/Product.tsx` — `supabase.from('products').select('*')`로 상품 조회, `useEffect` + `gsap.context`로 상품 목록 진입 애니메이션과 `ctx.revert()` 정리
+- `src/pages/Login.tsx`, `Register.tsx` — 로그인·회원가입 페이지 자리
+- `src/App.tsx`, `src/main.tsx` — `RouterProvider`(`navigation`에 `Header`)와 `Footer`로 앱 레이아웃 구성, `StrictMode`로 `#react-app`에 렌더링
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
 ## 실행 방법
@@ -180,29 +203,33 @@ npm run dev
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
-`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`, `11-fetching-data`는 Vite 프로젝트입니다.
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`, `11-fetching-data`, `12-react-with-supabase`는 Vite 프로젝트입니다.
 
 ```bash
-cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot, 11-fetching-data
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot, 11-fetching-data, 12-react-with-supabase
 npm install
 npm run dev                # Vite 개발 서버
 npm run build              # 타입 검사(tsc -b) 후 빌드
 npm run lint               # ESLint
 ```
 
-`05`~`11`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+`05`~`12`는 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+
+`12-react-with-supabase`는 폴더 안 `.env`에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`를 설정해야 합니다. (`.env`는 커밋하지 않음)
 
 ## 기술
 
 - React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
 - React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
-- React 19.1 / ReactDOM 19.1 (npm) — `06`~`11`
+- React 19.1 / ReactDOM 19.1 (npm) — `06`~`12`
 - Vite 8 + `@vitejs/plugin-react` — `04`, `05`
-- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`11`
-- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`11`은 `tsc -b` 타입 검사)
+- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`12`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`12`는 `tsc -b` 타입 검사)
+- `@supabase/supabase-js` 2 (Supabase 클라이언트, `12`)
+- GSAP 3 + `@gsap/react` (애니메이션, `12`)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
-- ESLint (`00-basic`, `04`~`11`)
+- ESLint (`00-basic`, `04`~`12`)
 
 ## License
 
