@@ -1,3 +1,4 @@
+import Contact from "@/pages/Contact";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Product from "@/pages/Product";
@@ -17,7 +18,7 @@ export const routes = [
   {
     title:'고객지원',
     path:'/Contact',
-    element: <div>CONTACT</div>
+    element: <Contact />
   },
   {
     title:'로그인',

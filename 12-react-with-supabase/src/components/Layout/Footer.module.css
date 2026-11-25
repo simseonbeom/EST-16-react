@@ -1,4 +1,13 @@
 .footer{
   background-color: black;
   padding: 2rem;
+  border-top: 3px solid #FD98AF;
+  color: var(--gray-400);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  text-align: center;
+
+  strong {
+    color: #FD98AF;
+  }
 }

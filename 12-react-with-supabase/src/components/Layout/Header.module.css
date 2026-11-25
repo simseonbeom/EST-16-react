@@ -10,6 +10,16 @@
     gap:2rem;
   
   }
+
+  a{
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: color 0.2s;
+
+    &:hover{
+      color:#FD98AF;
+    }
+  }
 }
 
 

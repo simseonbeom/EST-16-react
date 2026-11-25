@@ -1,92 +1,55 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import S from './Product.module.css'
 import gsap from 'gsap'
-import supabase from '@/supabase/supabase'
+import useProducts from '@/hook/useProducts';
+import { useGSAP } from '@gsap/react';
 
 function Product() {
 
 
-  supabase.from('products').select('*').then(console.log);
-  
+  const {products, loading} = useProducts();
 
   const UL = useRef<HTMLUListElement>(null);
  
-  useEffect(()=>{
-    if(!UL.current) return;
- 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(UL.current!.children,{
-        y:30,
-        opacity:0
-      },{
-        y:0,
-        opacity:1,
-        stagger:0.1
-      })
-    });
- 
-    return () => ctx.revert();
-  }, [])
+
+  useGSAP(()=>{
+    gsap.fromTo('li',{
+      y:30,
+      opacity:0
+    },{
+      y:0,
+      opacity:1,
+      stagger:0.1
+    })
+  },{dependencies:[products],scope:UL, revertOnUpdate:true});
+  
+
+
+  if(loading) return <p className={S.loading}>loading.....</p>
+
 
   return (
     <div className={S.container}>
       <ul ref={UL}>
-        <li>
-          <a href="/">
-            <figure>
-              <img src="https://framerusercontent.com/images/b7G2tciOtF1moIuVP1RhaGIQKKU.jpg" alt="" />
-            </figure>
-            <span className={S.brand}>오버핏 겨울 코트</span>
-            <span className={S.description}>가볍고 따뜻한 겨울 아우터, 어깨선이 자연스럽게 떨어지는 오버핏</span>
-            <span className={S.price}>399,000</span>
-            <div>
-              <span className={S.discount}>20%</span>
-              <span className={S.realPrice}>325,000</span>
-            </div>
-          </a>
-        </li>
-         <li>
-          <a href="/">
-            <figure>
-              <img src="https://framerusercontent.com/images/b7G2tciOtF1moIuVP1RhaGIQKKU.jpg" alt="" />
-            </figure>
-            <span className={S.brand}>오버핏 겨울 코트</span>
-            <span className={S.description}>가볍고 따뜻한 겨울 아우터, 어깨선이 자연스럽게 떨어지는 오버핏</span>
-            <span className={S.price}>399,000</span>
-            <div>
-              <span className={S.discount}>20%</span>
-              <span className={S.realPrice}>325,000</span>
-            </div>
-          </a>
-        </li>
-         <li>
-          <a href="/">
-            <figure>
-              <img src="https://framerusercontent.com/images/b7G2tciOtF1moIuVP1RhaGIQKKU.jpg" alt="" />
-            </figure>
-            <span className={S.brand}>오버핏 겨울 코트</span>
-            <span className={S.description}>가볍고 따뜻한 겨울 아우터, 어깨선이 자연스럽게 떨어지는 오버핏</span>
-            <span className={S.price}>399,000</span>
-            <div>
-              <span className={S.discount}>20%</span>
-              <span className={S.realPrice}>325,000</span>
-            </div>
-          </a>
-        </li>
-         <li>
-          <a href="/">
-            <figure>
-              <img src="https://framerusercontent.com/images/b7G2tciOtF1moIuVP1RhaGIQKKU.jpg" alt="" />
-            </figure>
-            <span className={S.brand}>오버핏 겨울 코트</span>
-            <span className={S.description}>가볍고 따뜻한 겨울 아우터, 어깨선이 자연스럽게 떨어지는 오버핏</span>
-            <span className={S.price}>399,000</span>
-            <div>
-              <span className={S.discount}>20%</span>
-              <span className={S.realPrice}>325,000</span>
-            </div>
-          </a>
-        </li>
+        {
+          products && 
+          products.map((item)=>(
+            <li key={item.id}>
+              <a href="/">
+                <figure>
+                  <img src={item.image_url} alt="" />
+                </figure>
+                <span className={S.brand}>{item.name}</span>
+                <span className={S.description}>{item.description}</span>
+                <span className={S.price}>{item.price.toLocaleString()}원</span>
+                <div>
+                  <span className={S.discount}>{item.sale}%</span>
+                  <span className={S.realPrice}>{(item.price - (item.price * item.sale * 0.01)).toLocaleString()}원</span>
+                </div>
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </div>
   )

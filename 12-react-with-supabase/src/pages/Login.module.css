@@ -1,0 +1,100 @@
+.container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 1rem;
+  background-color: #f6f6f7;
+  color: #404040;
+
+  form {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 2.5rem 2rem;
+    background-color: white;
+    border: 1px solid #ececec;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  hr {
+    width: 40px;
+    margin: -0.25rem auto 0.5rem;
+    border: none;
+    border-top: 3px solid #FD98AF;
+  }
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+  }
+
+  input {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fafafa;
+    color: #222;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #FD98AF;
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(253, 152, 175, 0.15);
+    }
+  }
+
+  button {
+    margin-top: 0.5rem;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 10px;
+    background-color: #111;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+
+    &:hover {
+      background-color: #FD98AF;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  /* 회원가입 안내 문구 */
+  p {
+    font-size: 0.85rem;
+    text-align: center;
+    color: #888;
+
+    a {
+      margin-left: 0.4rem;
+      font-weight: 700;
+      color: #FD98AF;
+      text-decoration: underline;
+    }
+  }
+}
