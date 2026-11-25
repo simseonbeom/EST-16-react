@@ -5,6 +5,17 @@
   align-items: center;
   padding: 0 2rem 0 0;
 
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+ 
+  .greeting {
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+
   ul{
     display: flex;
     gap:2rem;

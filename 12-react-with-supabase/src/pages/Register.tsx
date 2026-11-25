@@ -70,7 +70,7 @@ function Register() {
 
     Swal.fire({
       icon:'success',
-      title:'로그인 성공!',
+      title:'회원가입 완료!',
       text: "확인을 누르면 로그인 페이지로 이동합니다.",
       showConfirmButton:true,
       iconColor:'#FD98AF',
