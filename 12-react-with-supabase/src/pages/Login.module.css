@@ -3,13 +3,16 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 4rem 1rem;
+  padding: 5rem 1rem;
   background-color: #f6f6f7;
   color: #404040;
 
-  form {
+  > div {
     width: 100%;
-    max-width: 420px;
+    max-width: 380px;
+  }
+
+  form {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -37,7 +40,14 @@
     width: 40px;
     margin: -0.25rem auto 0.5rem;
     border: none;
-    border-top: 3px solid #FD98AF;
+    border-top: 3px solid rgb(255, 132, 0);
+  }
+
+  /* 버튼 아래 두 번째 hr은 "또는" 구분선처럼 */
+  button + hr {
+    width: 100%;
+    margin: 0.25rem 0 0;
+    border-top: 1px solid #eee;
   }
 
   label {
@@ -57,9 +67,9 @@
 
     &:focus {
       outline: none;
-      border-color: #FD98AF;
+      border-color: rgb(255, 132, 0);
       background-color: white;
-      box-shadow: 0 0 0 4px rgba(253, 152, 175, 0.15);
+      box-shadow: 0 0 0 4px rgba(255, 132, 0, 0.15);
     }
   }
 
@@ -76,7 +86,7 @@
     transition: background-color 0.2s, transform 0.1s;
 
     &:hover {
-      background-color: #FD98AF;
+      background-color: rgb(255, 132, 0);
     }
 
     &:active {
@@ -84,17 +94,23 @@
     }
   }
 
-  /* 회원가입 안내 문구 */
   p {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background-color: #fff1f0;
     font-size: 0.85rem;
     text-align: center;
-    color: #888;
+  }
 
-    a {
-      margin-left: 0.4rem;
-      font-weight: 700;
-      color: #FD98AF;
-      text-decoration: underline;
+  a {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #888;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    &:hover {
+      color: rgb(255, 132, 0);
     }
   }
 }

@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import S from './Register.module.css';
 import supabase from '@/supabase/supabase';
+import Swal from 'sweetalert2';
 
 function Register() {
 
@@ -46,7 +47,39 @@ function Register() {
       setError(signUpError?.message || '회원가입에 실패했습니다.');
       return;
     }
-    console.log(user);
+
+    const userId = user.id;
+    
+    if(avatarFile){
+      const fileExt = avatarFile.name.split('.').pop();
+      const fileName = `${userId}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const {error:uploadError} = await supabase.storage
+      .from('avatars')
+      .upload(filePath, avatarFile,{
+        upsert: true, // 덮어쓰기 ok 
+      })
+
+      if(uploadError){
+        console.log(uploadError);
+        setError('이미지 업로드에 실패했습니다.');
+        return;
+      }
+    }
+
+    Swal.fire({
+      icon:'success',
+      title:'로그인 성공!',
+      text: "확인을 누르면 로그인 페이지로 이동합니다.",
+      showConfirmButton:true,
+      iconColor:'#FD98AF',
+      confirmButtonColor:'#FD98AF',
+    }).then(() => {
+       history.pushState(null,'','/Login');
+       location.reload();
+    });
+
   }
 
   return (
