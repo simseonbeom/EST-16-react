@@ -18,7 +18,7 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 컴포넌트 분리·상태 연결 (검색·재고 필터·표시 개수), 상태 기반 라우팅과 객체 상태 폼으로 만든 노트 앱 (목록·상세·작성·수정·삭제) |
 | [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화, 제어·비제어 입력 비교 |
 | [`11-fetching-data`](./11-fetching-data) | `useEffect`로 부수 효과·정리(cleanup) 함수, `fetch` + `AbortController`로 데이터 가져오기 (로딩·에러 상태), `useRef`로 DOM 참조·`ref` prop 전달, `useEffect` + `useRef`로 채팅 스크롤, `useLayoutEffect`로 레이아웃 측정, 컴포넌트 라이프사이클 시각화, 커스텀 훅(`useUsers`)으로 데이터 가져오기 로직 분리, Context API로 prop drilling 없이 사용자·테마 공유 (`use`, Provider 컴포넌트, 커스텀 훅) |
-| [`12-react-with-supabase`](./12-react-with-supabase) | Supabase 클라이언트 연결(`createClient`, 환경 변수, `Database` 타입), Context 기반 직접 구현 라우터(`RouterProvider` / `NavLink` / `history.pushState`), GSAP(`useGSAP`, `gsap.context`)으로 진입 애니메이션을 적용한 쇼핑몰 레이아웃 |
+| [`12-react-with-supabase`](./12-react-with-supabase) | Supabase 클라이언트 연결(`createClient`, 환경 변수, `Database` 타입), Context 기반 직접 구현 라우터(`RouterProvider` / `NavLink` / `history.pushState`), GSAP(`useGSAP`, `gsap.context`)으로 진입 애니메이션을 적용한 쇼핑몰 레이아웃, 커스텀 훅(`useProducts`)으로 상품 조회 분리, Supabase Auth 회원가입(`signUp` + Storage 아바타 업로드)·로그인(`signInWithPassword`)·로그아웃(`signOut`), `AuthProvider` / `useAuth`로 로그인 상태 공유, SweetAlert2 알림 |
 
 ### 00-basic
 
@@ -181,14 +181,19 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `src/supabase/database.types.ts` — Supabase CLI로 생성한 `Database` 타입 (`products` 테이블 `Row` / `Insert` / `Update`)
 - `src/vite-env.d.ts` — `ImportMetaEnv`로 Supabase 환경 변수 타입 선언
 - `src/router/RouterProvider/index.tsx` — `RouterContext`로 현재 경로·`setHistoryRoute`·`params` 공유, `:param` 패턴을 정규식으로 매칭, `popstate` 이벤트 구독(`useLayoutEffect`), `useMemo`로 컨텍스트 값 기억, `useRouter` / `useParams` 훅
-- `src/router/RouterProvider/NotFound.tsx` — 일치하는 라우트가 없을 때 보여주는 404 페이지
+- `src/router/RouterProvider/NotFound.tsx` — 일치하는 라우트가 없을 때 보여주는 404 페이지 (CSS Modules)
 - `src/router/router.tsx` — `title` / `path` / `element`로 구성한 라우트 목록 (메인·상품목록·고객지원·로그인·회원가입)
 - `src/components/NavLink.tsx` — `preventDefault` 후 `setHistoryRoute`와 `history.pushState`로 새로고침 없이 이동, 현재 경로면 활성 클래스 적용
-- `src/components/Layout/Header.tsx`, `Footer.tsx` — `routes.map`으로 메인 메뉴를 그리는 헤더와 푸터 (CSS Modules)
+- `src/components/auth/AuthProvider.tsx` — 마운트 시 `supabase.auth.getUser()`로 로그인 사용자(`id` / `email` / `user_metadata.nickname`, 없으면 이메일 앞부분) 상태 설정, `signOut()` 후 사용자 비우는 `logout`, `user` / `isAuth` / `logout`을 Context로 제공, Provider 밖에서 사용 시 에러를 던지는 `useAuth` 훅
+- `src/components/Layout/Header.tsx` — `useAuth`로 로그인 시 닉네임 인사말 표시, `filter`로 로그인·회원가입 메뉴 숨김, `confirm` 후 `logout`을 호출하는 로그아웃 링크
+- `src/components/Layout/Footer.tsx` — 저작권 문구 푸터 (CSS Modules)
+- `src/hook/useProducts.ts` — `Database` 타입에서 `Pick`으로 필요한 컬럼만 고른 `ProductItem` 타입, `useEffect`에서 `select('id, name, price, sale, image_url, description')`로 상품 조회, `ignore` 플래그로 늦게 도착한 응답 무시, `products` / `loading` 반환하는 커스텀 훅 (`Tables` / `TablesInsert` / `TablesUpdate` 타입 주석)
 - `src/pages/Home.tsx` — `useGSAP`(`scope`: `ref`)으로 제목·문구를 `stagger` 페이드 업하는 메인 페이지
-- `src/pages/Product.tsx` — `supabase.from('products').select('*')`로 상품 조회, `useEffect` + `gsap.context`로 상품 목록 진입 애니메이션과 `ctx.revert()` 정리
-- `src/pages/Login.tsx`, `Register.tsx` — 로그인·회원가입 페이지 자리
-- `src/App.tsx`, `src/main.tsx` — `RouterProvider`(`navigation`에 `Header`)와 `Footer`로 앱 레이아웃 구성, `StrictMode`로 `#react-app`에 렌더링
+- `src/pages/Product.tsx` — `useProducts`로 상품 조회 후 로딩 표시, `useGSAP`(`dependencies`, `scope`, `revertOnUpdate`)으로 상품 목록 진입 애니메이션, 할인율(`sale`)로 실제 판매가 계산·`toLocaleString()` 표시
+- `src/pages/Register.tsx` — 제어 컴포넌트로 이메일·비밀번호·비밀번호 확인·닉네임 입력, 비밀번호 일치 검사, `supabase.auth.signUp`(`options.data`에 `nickname`), `FileReader.readAsDataURL`로 아바타 미리보기, `supabase.storage.from('avatars').upload`(`upsert`)로 프로필 이미지 업로드, `Swal.fire` 완료 알림 후 로그인 페이지 이동
+- `src/pages/Login.tsx` — 제어 컴포넌트로 이메일·비밀번호 입력, `supabase.auth.signInWithPassword`로 로그인·에러 메시지 표시, `Swal.fire` 성공 알림 후 `history.pushState` + `setHistoryRoute`로 메인 이동, 회원가입 페이지 링크
+- `src/pages/Contact.tsx` — 고객지원 준비 중 페이지
+- `src/App.tsx`, `src/main.tsx` — `AuthProvider`로 감싼 `RouterProvider`(`navigation`에 `Header`)와 `Footer`로 앱 레이아웃 구성, `StrictMode`로 `#react-app`에 렌더링
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
 ## 실행 방법
@@ -227,6 +232,7 @@ npm run lint               # ESLint
 - TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`12`는 `tsc -b` 타입 검사)
 - `@supabase/supabase-js` 2 (Supabase 클라이언트, `12`)
 - GSAP 3 + `@gsap/react` (애니메이션, `12`)
+- SweetAlert2 11 (알림 모달, `12`)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
 - ESLint (`00-basic`, `04`~`12`)
