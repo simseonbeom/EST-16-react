@@ -1,4 +1,5 @@
 import Contact from "@/pages/Contact";
+import CreateProduct from "@/pages/CreateProduct";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Product from "@/pages/Product";
@@ -12,8 +13,13 @@ export const routes = [
     element: <Home />
   },
   {
+    title:'상품등록',
+    path:'/Create', 
+    element: <CreateProduct />
+  },
+  {
     title:'상품상세',
-    path:'/Product:id', // 동적 라우팅  dynamic routing
+    path:'/Product/:id', // 동적 라우팅  dynamic routing
     element: <ProductDetail />
   },
   {

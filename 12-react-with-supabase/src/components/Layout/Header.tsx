@@ -12,7 +12,7 @@ function Header() {
   const [isAvatarLoaded, setIsAvatarLoaded] = useState(false);
 
   const hideWhenLoggedIn = ['로그인', '회원가입'];
-  const alwayHidden = ['상품상세'];
+  const alwayHidden = ['상품상세','상품등록'];
 
   const visibleRoutes = routes.filter(
     ({title})=> 

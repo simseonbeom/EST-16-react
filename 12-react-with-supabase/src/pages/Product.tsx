@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import S from './Product.module.css'
 import gsap from 'gsap'
 import useProducts from '@/hook/useProducts';
 import { useGSAP } from '@gsap/react';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { RouterContext } from '@/router/RouterProvider';
 
 function Product() {
 
@@ -14,6 +15,8 @@ function Product() {
 
   const UL = useRef<HTMLUListElement>(null);
   
+  const {setHistoryRoute} = useContext(RouterContext)!;
+
   useGSAP(()=>{
 
     if(!UL.current || !UL.current.children) return ;
@@ -28,6 +31,18 @@ function Product() {
     })
   },{dependencies:[products,isAuth],scope:UL, revertOnUpdate:true});
 
+  const handleRouter = (e:React.MouseEvent<HTMLAnchorElement>, id:string) => {
+    e.preventDefault();
+
+    history.pushState(null,'',`/Product/${id}`)
+    setHistoryRoute(`/Product/${id}`)
+  }
+
+  const handleCreate = () => {
+    history.pushState(null,'','/Create');
+    setHistoryRoute('/Create');
+  }
+  
   if(loading) return <p className={S.loading}>loading.....</p>
 
   if(!isAuth){
@@ -40,16 +55,19 @@ function Product() {
     )
   }
 
-
-
   return (
     <div className={S.container}>
+      <div className={S.toolbar}>
+        <button className={S.createButton} type='button' onClick={handleCreate}>
+          + 상품 등록
+        </button>
+      </div>
       <ul ref={UL}>
         {
           products && 
           products.map((item)=>(
             <li key={item.id}>
-              <a href="/">
+              <a href={`/Product/${item.id}`} onClick={(e)=> handleRouter( e, item.id )}>
                 <figure>
                   <img src={item.image_url} alt="" />
                 </figure>
