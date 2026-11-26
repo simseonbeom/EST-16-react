@@ -18,7 +18,7 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`09-react-component-states`](./09-react-component-states) | 컴포넌트 상태와 파생 상태, 상태 끌어올리기와 props로 상태·이벤트 핸들러 전달, 제어 컴포넌트, `debounce`를 적용한 즉시 검색 (사용자 목록 검색), 상품 목록 컴포넌트 분리·상태 연결 (검색·재고 필터·표시 개수), 상태 기반 라우팅과 객체 상태 폼으로 만든 노트 앱 (목록·상세·작성·수정·삭제) |
 | [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화, 제어·비제어 입력 비교 |
 | [`11-fetching-data`](./11-fetching-data) | `useEffect`로 부수 효과·정리(cleanup) 함수, `fetch` + `AbortController`로 데이터 가져오기 (로딩·에러 상태), `useRef`로 DOM 참조·`ref` prop 전달, `useEffect` + `useRef`로 채팅 스크롤, `useLayoutEffect`로 레이아웃 측정, 컴포넌트 라이프사이클 시각화, 커스텀 훅(`useUsers`)으로 데이터 가져오기 로직 분리, Context API로 prop drilling 없이 사용자·테마 공유 (`use`, Provider 컴포넌트, 커스텀 훅) |
-| [`12-react-with-supabase`](./12-react-with-supabase) | Supabase 클라이언트 연결(`createClient`, 환경 변수, `Database` 타입), Context 기반 직접 구현 라우터(`RouterProvider` / `NavLink` / `history.pushState`), GSAP(`useGSAP`, `gsap.context`)으로 진입 애니메이션을 적용한 쇼핑몰 레이아웃, 커스텀 훅(`useProducts`)으로 상품 조회 분리, Supabase Auth 회원가입(`signUp` + Storage 아바타 업로드)·로그인(`signInWithPassword`)·로그아웃(`signOut`), `AuthProvider` / `useAuth`로 로그인 상태 공유, SweetAlert2 알림 |
+| [`12-react-with-supabase`](./12-react-with-supabase) | Supabase 클라이언트 연결(`createClient`, 환경 변수, `Database` 타입), Context 기반 직접 구현 라우터(`RouterProvider` / `NavLink` / `history.pushState`), GSAP(`useGSAP`, `gsap.context`)으로 진입 애니메이션을 적용한 쇼핑몰 레이아웃, 커스텀 훅(`useProducts`)으로 상품 조회 분리, Supabase Auth 회원가입(`signUp` + Storage 아바타 업로드)·로그인(`signInWithPassword`)·로그아웃(`signOut`), `AuthProvider` / `useAuth`로 로그인 상태 공유, `onAuthStateChange`로 인증 상태 구독, Storage 아바타 조회(`list` / `getPublicUrl`), 동적 라우팅(`/Product/:id`)으로 상품 상세 조회(`eq` / `single`)·수정(`update`), 상품 등록(Storage 이미지 업로드 + `insert`), SweetAlert2 알림 |
 
 ### 00-basic
 
@@ -182,14 +182,17 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `src/vite-env.d.ts` — `ImportMetaEnv`로 Supabase 환경 변수 타입 선언
 - `src/router/RouterProvider/index.tsx` — `RouterContext`로 현재 경로·`setHistoryRoute`·`params` 공유, `:param` 패턴을 정규식으로 매칭, `popstate` 이벤트 구독(`useLayoutEffect`), `useMemo`로 컨텍스트 값 기억, `useRouter` / `useParams` 훅
 - `src/router/RouterProvider/NotFound.tsx` — 일치하는 라우트가 없을 때 보여주는 404 페이지 (CSS Modules)
-- `src/router/router.tsx` — `title` / `path` / `element`로 구성한 라우트 목록 (메인·상품목록·고객지원·로그인·회원가입)
+- `src/router/router.tsx` — `title` / `path` / `element`로 구성한 라우트 목록 (메인·상품등록·상품상세·상품목록·고객지원·로그인·회원가입), `/Product/:id` 동적 라우팅
 - `src/components/NavLink.tsx` — `preventDefault` 후 `setHistoryRoute`와 `history.pushState`로 새로고침 없이 이동, 현재 경로면 활성 클래스 적용
-- `src/components/auth/AuthProvider.tsx` — 마운트 시 `supabase.auth.getUser()`로 로그인 사용자(`id` / `email` / `user_metadata.nickname`, 없으면 이메일 앞부분) 상태 설정, `signOut()` 후 사용자 비우는 `logout`, `user` / `isAuth` / `logout`을 Context로 제공, Provider 밖에서 사용 시 에러를 던지는 `useAuth` 훅
-- `src/components/Layout/Header.tsx` — `useAuth`로 로그인 시 닉네임 인사말 표시, `filter`로 로그인·회원가입 메뉴 숨김, `confirm` 후 `logout`을 호출하는 로그아웃 링크
+- `src/components/auth/AuthProvider.tsx` — 마운트 시 `supabase.auth.getUser()`로 로그인 사용자(`id` / `email` / `user_metadata.nickname`, 없으면 이메일 앞부분) 상태 설정, `onAuthStateChange`로 `SIGNED_IN` / `SIGNED_OUT` 이벤트에 따라 사용자 갱신(정리 함수에서 `unsubscribe`), `signOut()` 후 사용자 비우는 `logout`, `user` / `isAuth` / `logout`을 Context로 제공, Provider 밖에서 사용 시 에러를 던지는 `useAuth` 훅
+- `src/api/getAvatarUrl.ts` — `supabase.storage.from('avatars').list`(`search: userId`)로 사용자 id로 시작하는 파일을 찾아 `getPublicUrl`로 공개 URL 반환
+- `src/components/Layout/Header.tsx` — `useAuth`로 로그인 시 닉네임 인사말 표시, `filter`로 로그인·회원가입 메뉴 숨김·상품상세·상품등록 메뉴 항상 숨김, `useEffect`에서 `getAvatarUrl`로 아바타 이미지 표시(`ignore` 플래그, 없으면 기본 이미지), `confirm` 후 `logout`을 호출하는 로그아웃 링크
 - `src/components/Layout/Footer.tsx` — 저작권 문구 푸터 (CSS Modules)
 - `src/hook/useProducts.ts` — `Database` 타입에서 `Pick`으로 필요한 컬럼만 고른 `ProductItem` 타입, `useEffect`에서 `select('id, name, price, sale, image_url, description')`로 상품 조회, `ignore` 플래그로 늦게 도착한 응답 무시, `products` / `loading` 반환하는 커스텀 훅 (`Tables` / `TablesInsert` / `TablesUpdate` 타입 주석)
 - `src/pages/Home.tsx` — `useGSAP`(`scope`: `ref`)으로 제목·문구를 `stagger` 페이드 업하는 메인 페이지
-- `src/pages/Product.tsx` — `useProducts`로 상품 조회 후 로딩 표시, `useGSAP`(`dependencies`, `scope`, `revertOnUpdate`)으로 상품 목록 진입 애니메이션, 할인율(`sale`)로 실제 판매가 계산·`toLocaleString()` 표시
+- `src/pages/Product.tsx` — `useProducts`로 상품 조회 후 로딩 표시, `useGSAP`(`dependencies`, `scope`, `revertOnUpdate`)으로 상품 목록 진입 애니메이션, 할인율(`sale`)로 실제 판매가 계산·`toLocaleString()` 표시, 비로그인 시 안내 화면, 상품 클릭 시 `history.pushState` + `setHistoryRoute`로 상세(`/Product/:id`) 이동, 상품 등록 버튼
+- `src/pages/ProductDetail.tsx` — `useParams`로 받은 `id`로 `select('*').eq('id', id).single()` 상품 단건 조회(`Tables<'products'>` 타입, `ignore` 플래그, 로딩·에러 처리), 상품명 입력 후 `update({ name }).eq('id', id).select()`로 수정(빈 결과는 권한 없음으로 처리), 할인가 계산, 수정·뒤로가기 버튼 (CSS Modules)
+- `src/pages/CreateProduct.tsx` — 제어 컴포넌트로 상품명·설명·가격·할인율(정규식으로 숫자만 허용)·이미지 파일 입력, 로그인·필수값 검사, `storage.from('product-images').upload`(`${user.id}_${Date.now()}` 파일명, `upsert`) → `getPublicUrl` → `from('products').insert`로 상품 등록 후 상품목록 이동 (CSS Modules)
 - `src/pages/Register.tsx` — 제어 컴포넌트로 이메일·비밀번호·비밀번호 확인·닉네임 입력, 비밀번호 일치 검사, `supabase.auth.signUp`(`options.data`에 `nickname`), `FileReader.readAsDataURL`로 아바타 미리보기, `supabase.storage.from('avatars').upload`(`upsert`)로 프로필 이미지 업로드, `Swal.fire` 완료 알림 후 로그인 페이지 이동
 - `src/pages/Login.tsx` — 제어 컴포넌트로 이메일·비밀번호 입력, `supabase.auth.signInWithPassword`로 로그인·에러 메시지 표시, `Swal.fire` 성공 알림 후 `history.pushState` + `setHistoryRoute`로 메인 이동, 회원가입 페이지 링크
 - `src/pages/Contact.tsx` — 고객지원 준비 중 페이지
