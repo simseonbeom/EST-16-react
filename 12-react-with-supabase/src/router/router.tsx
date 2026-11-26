@@ -2,6 +2,7 @@ import Contact from "@/pages/Contact";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Product from "@/pages/Product";
+import ProductDetail from "@/pages/ProductDetail";
 import Register from "@/pages/Register";
 
 export const routes = [
@@ -9,6 +10,11 @@ export const routes = [
     title:'메인',
     path:'/',
     element: <Home />
+  },
+  {
+    title:'상품상세',
+    path:'/Product:id', // 동적 라우팅  dynamic routing
+    element: <ProductDetail />
   },
   {
     title:'상품목록',

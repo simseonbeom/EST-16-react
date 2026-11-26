@@ -3,16 +3,21 @@ import S from './Product.module.css'
 import gsap from 'gsap'
 import useProducts from '@/hook/useProducts';
 import { useGSAP } from '@gsap/react';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 function Product() {
 
 
   const {products, loading} = useProducts();
 
-  const UL = useRef<HTMLUListElement>(null);
- 
+  const { isAuth } = useAuth();
 
+  const UL = useRef<HTMLUListElement>(null);
+  
   useGSAP(()=>{
+
+    if(!UL.current || !UL.current.children) return ;
+
     gsap.fromTo('li',{
       y:30,
       opacity:0
@@ -21,11 +26,20 @@ function Product() {
       opacity:1,
       stagger:0.1
     })
-  },{dependencies:[products],scope:UL, revertOnUpdate:true});
-  
-
+  },{dependencies:[products,isAuth],scope:UL, revertOnUpdate:true});
 
   if(loading) return <p className={S.loading}>loading.....</p>
+
+  if(!isAuth){
+    return (
+      <div className={S.invalid}>
+        <span style={{fontSize:'10rem'}}>⚠️</span>
+        <h3>상품 목록은 로그인 후 이용 가능합니다.</h3>
+        <a href="">설마? 아직도 효블리 회원이 아니세요??????</a>
+      </div>
+    )
+  }
+
 
 
   return (
