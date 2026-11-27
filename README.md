@@ -19,6 +19,7 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 | [`10-snapshot`](./10-snapshot) | 스냅샷으로서의 State(State as a Snapshot), `useState` 지연 초기화, 객체 상태 불변 업데이트, `memo` / `useCallback` / `useMemo`로 리렌더링 최적화, 제어·비제어 입력 비교 |
 | [`11-fetching-data`](./11-fetching-data) | `useEffect`로 부수 효과·정리(cleanup) 함수, `fetch` + `AbortController`로 데이터 가져오기 (로딩·에러 상태), `useRef`로 DOM 참조·`ref` prop 전달, `useEffect` + `useRef`로 채팅 스크롤, `useLayoutEffect`로 레이아웃 측정, 컴포넌트 라이프사이클 시각화, 커스텀 훅(`useUsers`)으로 데이터 가져오기 로직 분리, Context API로 prop drilling 없이 사용자·테마 공유 (`use`, Provider 컴포넌트, 커스텀 훅) |
 | [`12-react-with-supabase`](./12-react-with-supabase) | Supabase 클라이언트 연결(`createClient`, 환경 변수, `Database` 타입), Context 기반 직접 구현 라우터(`RouterProvider` / `NavLink` / `history.pushState`), GSAP(`useGSAP`, `gsap.context`)으로 진입 애니메이션을 적용한 쇼핑몰 레이아웃, 커스텀 훅(`useProducts`)으로 상품 조회 분리, Supabase Auth 회원가입(`signUp` + Storage 아바타 업로드)·로그인(`signInWithPassword`)·로그아웃(`signOut`), `AuthProvider` / `useAuth`로 로그인 상태 공유, `onAuthStateChange`로 인증 상태 구독, Storage 아바타 조회(`list` / `getPublicUrl`), 동적 라우팅(`/Product/:id`)으로 상품 상세 조회(`eq` / `single`)·수정(`update`), 상품 등록(Storage 이미지 업로드 + `insert`), SweetAlert2 알림 |
+| [`13-advanced-state-management`](./13-advanced-state-management) | 같은 문제를 커스텀 훅 → `useReducer` → Context → Zustand 순서로 풀며 상태 관리 방식 비교, React Router(`createBrowserRouter`, `lazy` 라우트) 레이아웃, 카운터(커스텀 훅 `useCounter` / `useReducer` / Zustand `create`·selector 구독·`useShallow`), 할 일 관리(리듀서 액션 생성 함수 + `TaskProvider` / `useTask` Context, Zustand `persist` 스토어와 파생 상태 셀렉터 훅), 칸반보드·스위치 스타터 |
 
 ### 00-basic
 
@@ -199,6 +200,33 @@ EST-16 React 수업 실습 저장소입니다. 빌드 도구 없이 브라우저
 - `src/App.tsx`, `src/main.tsx` — `AuthProvider`로 감싼 `RouterProvider`(`navigation`에 `Header`)와 `Footer`로 앱 레이아웃 구성, `StrictMode`로 `#react-app`에 렌더링
 - `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭
 
+### 13-advanced-state-management
+
+- `src/router/router.tsx` — `text` / `path` / `Component`로 구성한 `navigation` 목록(홈·카운터·할 일·칸반보드·심화 Switch), 칸반보드는 `lazy` + `HydrateFallback`(`Spinner`)으로 지연 로딩, `createBrowserRouter`(`basename: BASE_URL`)와 `navigationItems` 내보내기
+- `src/utils/configRoutes.ts` — `AppRoute` 목록을 `RouteObject`로 변환 (`path`가 `''` / `'/'`면 `index` 라우트, `children` 재귀 변환)
+- `src/utils/getNavigationItems.ts` — `display`가 없는 라우트만 골라 `path` / `text` 내비게이션 항목 생성
+- `src/@types/global.d.ts` — `RouteObject`에 `text` / `display`를 더한 `AppRoute` 타입
+- `src/pages/Root.tsx` — `Header` / `GlobalNav` / `Footer` 레이아웃, `useNavigation`의 `loading` 상태면 `Spinner`, 아니면 `<Outlet>`
+- `src/components/GlobalNav.tsx` — `NavLink`(`end`, `isActive`)로 현재 페이지 메뉴 강조
+- `src/utils/tw.ts` — `clsx` + `tailwind-merge`로 클래스 병합
+- `src/pages/Home/index.tsx` — 페이지별 학습 로드맵(Part 1~10) 링크, React 19 `<title>` / `<meta>` 문서 메타데이터
+- `src/hook/useCounter.ts` — `count` / `step` / `min` / `max` 옵션, `useCallback`으로 감싼 `increment` / `decrement`(최솟값·최댓값 제한)·`reset`, `isMinDisabled` / `isMaxDisabled`를 반환하는 커스텀 훅
+- `src/miniApp/Counter/index_.tsx`, `CountButton_.tsx`, `CountDisplay_.tsx` — `useCounter`로 만든 카운터 (컴포넌트마다 독립된 상태, props로 `count` / `onUpdate` 전달, `memo`)
+- `src/miniApp/CounterReducer/index.tsx` — `increment` / `decrement` / `reset` / `set`(`payload`) 액션 유니온 타입과 `reducer`, `useReducer` + `dispatch`로 만든 카운터
+- `src/miniApp/Counter/@store.ts` — Zustand `create<Store>()`로 `count` / `step` / `min` / `max` 상태와 `increment` / `decrement` / `setStep` / `reset`(`store.getInitialState()`) 액션을 가진 카운터 스토어
+- `src/miniApp/Counter/index.tsx`, `CountButton.tsx`, `CountDisplay.tsx`, `CounterControls.tsx` — 스토어를 selector로 선택적 구독(`s => s.count`), 여러 값은 `useShallow`로 배열 구독, `type`(`+` / `-`)에 따라 액션 선택, `reset`·`step` 입력 컨트롤 (여러 카운터가 같은 상태 공유)
+- `src/pages/Counter/index.tsx` — 커스텀 훅 / `useReducer` / Zustand 카운터 비교, 전체 구독과 selector 구독 차이 주석
+- `src/miniApp/TaskManager/@types.ts` — `Task` 타입(`id` / `content` / `isCompleted` / `isPin`)과 `INITIAL_TASKS`
+- `src/miniApp/TaskManager/@reducer.ts` — `ACTION_TYPE`(`as const`) 상수, `togglePin` / `setTask` / `deleteTask` / `addTask` 액션 생성 함수와 액션 타입, `map` / `filter` / 전개 연산자로 불변 업데이트하는 `reducer` (`crypto.randomUUID()`로 새 할 일 id)
+- `src/miniApp/TaskManager/@context.tsx` — `useReducer(taskReducer, INITIAL_TASKS)` 상태를 `TaskProvider`로 제공, `useMemo`로 `dispatch` 메서드·파생 상태(`pinnedTaskList` / `unpinnedTaskList`)·컨텍스트 값 기억, Provider 밖에서 사용 시 에러를 던지는 `useTask` 훅
+- `src/miniApp/TaskManager/TaskManager_.tsx`, `PinnedTaskList_.tsx`, `UnpinnedTaskList_.tsx` — props 전달 대신 `TaskProvider` + `useTask`로 목록·메서드 사용 (컨텍스트 값이 바뀌면 모든 소비 컴포넌트가 리렌더링되는 Context의 한계를 `console.log`로 확인)
+- `src/miniApp/TaskManager/@store.ts` — Zustand `persist` 미들웨어(`name: 'task-store'`, localStorage 저장)로 만든 할 일 스토어(`addTask` / `deleteTask` / `togglePin` / `setTask` / `reset`), `useShallow`로 고정·미고정 목록을 고르는 `usePinnedTasks` / `useUnpinnedTasks` 셀렉터 훅
+- `src/miniApp/TaskManager/TaskManager.tsx`, `PinnedTaskList.tsx`, `UnpinnedTaskList.tsx` — Provider 없이 셀렉터 훅과 `useShallow`로 필요한 상태·액션만 구독해 리렌더링 범위 비교
+- `src/pages/Tasks/index.tsx` — 리듀서 + Context 할 일 앱과 Zustand 할 일 앱 비교
+- `src/miniApp/KanbanBoard/` — 계획·진행중·완료 칼럼, 드래그 앤 드롭(`onDragOver` / `onDrop`), `<dialog>`(`showModal`)와 `debounce` 입력으로 할 일 추가하는 칸반보드 스타터 (스토어 연결 전)
+- `src/hook/useSwitch.ts`, `useSwitchReducer.ts`, `src/miniApp/Switcher/Switch.tsx` — `useId`, `role="switch"` / `aria-checked`, 키보드(Enter·Space·방향키) 접근성 속성을 갖춘 제어·비제어 스위치 훅 스타터 (상태 로직 구현 전)
+- `vite.config.ts` — 개발 서버 포트 `3000`, `@` 경로 별칭, `@tailwindcss/vite` 플러그인
+
 ## 실행 방법
 
 Node.js가 필요합니다. 각 폴더에서 따로 실행합니다.
@@ -211,17 +239,17 @@ npm run dev
 
 브라우저에서 http://localhost:3000 을 열면 됩니다. (`live-server`가 파일 변경 시 자동 새로고침)
 
-`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`, `11-fetching-data`, `12-react-with-supabase`는 Vite 프로젝트입니다.
+`04-vite-template/vite-custom-template`, `05-html-vs-jsx-markup`, `06-component-purity`, `07-responding-to-events`, `08-declarative-programming`, `09-react-component-states`, `10-snapshot`, `11-fetching-data`, `12-react-with-supabase`, `13-advanced-state-management`는 Vite 프로젝트입니다.
 
 ```bash
-cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot, 11-fetching-data, 12-react-with-supabase
+cd 05-html-vs-jsx-markup   # 또는 04-vite-template/vite-custom-template, 06-component-purity, 07-responding-to-events, 08-declarative-programming, 09-react-component-states, 10-snapshot, 11-fetching-data, 12-react-with-supabase, 13-advanced-state-management
 npm install
 npm run dev                # Vite 개발 서버
 npm run build              # 타입 검사(tsc -b) 후 빌드
 npm run lint               # ESLint
 ```
 
-`05`~`12`는 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
+`05`~`13`은 http://localhost:3000, `04-vite-template`은 Vite 기본 포트 http://localhost:5173 에서 열립니다.
 
 `12-react-with-supabase`는 폴더 안 `.env`에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`를 설정해야 합니다. (`.env`는 커밋하지 않음)
 
@@ -229,16 +257,20 @@ npm run lint               # ESLint
 
 - React 19.1 / ReactDOM 19.1 (esm.sh CDN, ES Module) — `00`~`03`
 - React 19.3 / ReactDOM 19.3 (npm) — `04`, `05`
-- React 19.1 / ReactDOM 19.1 (npm) — `06`~`12`
+- React 19.1 / ReactDOM 19.1 (npm) — `06`~`13`
 - Vite 8 + `@vitejs/plugin-react` — `04`, `05`
-- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`12`
-- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`12`는 `tsc -b` 타입 검사)
+- Vite 7 + `@vitejs/plugin-react` 4 — `06`~`13`
+- TypeScript (`03`은 `tsc`로 JSX 컴파일, `04`~`13`은 `tsc -b` 타입 검사)
 - `@supabase/supabase-js` 2 (Supabase 클라이언트, `12`)
 - GSAP 3 + `@gsap/react` (애니메이션, `12`)
 - SweetAlert2 11 (알림 모달, `12`)
+- Zustand 5 (전역 상태 관리, `persist` 미들웨어, `13`)
+- React Router 7 (`createBrowserRouter`, `13`)
+- Tailwind CSS 4 + `@tailwindcss/vite`, `clsx` + `tailwind-merge` (`13`)
+- `react-icons` 5 (`13`)
 - `@babel/standalone` (브라우저 JSX 변환, `03`)
 - live-server (개발 서버, `00`~`03`)
-- ESLint (`00-basic`, `04`~`12`)
+- ESLint (`00-basic`, `04`~`13`)
 
 ## License
 
