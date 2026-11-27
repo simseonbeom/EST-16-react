@@ -1,12 +1,30 @@
-import { PiPushPinFill, PiPushPinLight } from 'react-icons/pi';
 import tw from '@/utils/tw';
-import type { Task } from './@types';
+import { PiPushPinFill, PiPushPinLight } from 'react-icons/pi';
+import { useShallow } from 'zustand/shallow';
+import { usePinnedTasks, useTaskStore } from './@store';
 
 function PinnedTaskList() {
 
-  const pinnedTaskList: Task[] = [];
-  const togglePin = (_taskId: string) => {};
-  const setTask = (_taskId: string, _isCompleted: boolean) => {};
+
+  // const pinnedTaskList: Task[] = [];
+  // const togglePin = (_taskId: string) => {};
+  // const setTask = (_taskId: string, _isCompleted: boolean) => {};
+
+  // const tasks = useTaskStore( s => s.tasks )
+  // const pinnedTaskList = tasks.filter( t => t.isPin);
+
+  // const togglePin = useTaskStore( s => s.togglePin)
+  // const setTask = useTaskStore( s => s.setTask)
+  
+  const pinnedTaskList = usePinnedTasks();
+
+  const { togglePin, setTask } = useTaskStore(useShallow((s)=> ({
+    togglePin:s.togglePin,
+    setTask:s.setTask
+  })))
+  
+  console.log('[zustand] pinned 렌더');
+  
 
   const handleSetTask = (taskId:string, isCompleted:boolean) => {
     setTask(taskId, isCompleted);

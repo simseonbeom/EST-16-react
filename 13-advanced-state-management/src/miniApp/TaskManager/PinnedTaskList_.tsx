@@ -1,14 +1,16 @@
 import { PiPushPinFill, PiPushPinLight } from 'react-icons/pi';
 import tw from '@/utils/tw';
 import type { Task } from './@types';
+import { useTask } from './@context';
 
-interface Props {
-  pinnedTaskList: Task[];
-  setTask: (taskId: string, isCompleted: boolean) => void;
-  togglePin: (taskId: string) => void;
-}
 
-function PinnedTaskList({ pinnedTaskList, setTask, togglePin }: Props) {
+function PinnedTaskList() {
+
+  const {
+    pinnedTaskList,
+    methods: { togglePin, setTask }
+  } = useTask();
+
 
   const handleSetTask = (taskId:string, isCompleted:boolean) => {
     setTask(taskId, isCompleted);
@@ -17,6 +19,9 @@ function PinnedTaskList({ pinnedTaskList, setTask, togglePin }: Props) {
   const handleTogglePin = (taskId:string) => {
     togglePin(taskId);
   };
+
+  console.log('Pinned render');
+  
 
   return (
     <ul className='flex flex-col gap-2' >

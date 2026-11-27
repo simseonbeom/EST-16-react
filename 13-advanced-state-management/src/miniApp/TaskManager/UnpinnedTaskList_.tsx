@@ -2,15 +2,17 @@ import { PiPushPinFill, PiPushPinLight } from 'react-icons/pi';
 import { RxCross1 } from 'react-icons/rx';
 import tw from '@/utils/tw';
 import type { Task } from './@types';
+import { useTask } from './@context';
 
-interface Props {
-  unpinnedTaskList: Task[];
-  setTask: (taskId: string, isCompleted: boolean) => void;
-  togglePin: (taskId: string) => void;
-  deleteTask: (deleteId: string) => void;
-}
 
-function UnpinnedTaskList({ unpinnedTaskList, setTask, togglePin, deleteTask }: Props) {
+
+function UnpinnedTaskList() {
+
+  // 모든게 전체 구독  
+  const {
+    unpinnedTaskList,
+    methods: { setTask, togglePin, deleteTask }
+  } = useTask();
 
   const handleSetTask = (taskId:string, isCompleted:boolean) => {
     setTask(taskId, isCompleted);
@@ -24,6 +26,7 @@ function UnpinnedTaskList({ unpinnedTaskList, setTask, togglePin, deleteTask }: 
     deleteTask(deleteId);
   };
 
+  console.log('Unpinned render');
 
   return (
     <ul className='flex flex-col gap-6'>
